@@ -9,9 +9,9 @@ Gem::Specification.new do |s|
   s.version     = ApiNotify::VERSION
   s.authors     = ["Edgars Kaukis"]
   s.email       = ["e.kaukis@gmail.com"]
-  s.homepage    = "TODO"
-  s.summary     = "TODO: Summary of ApiNotify."
-  s.description = "TODO: Description of ApiNotify."
+  s.homepage    = "https://github.com/ekaukis/api_notify"
+  s.summary     = "ApiNotify allows to comunicate between two systems via API"
+  s.description = "ApiNotify is an ActiveRecord extender. Based on model callbacks, api_notify knows if it needs to send request."
 
   s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
 
