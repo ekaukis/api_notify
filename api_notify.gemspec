@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.version     = ApiNotify::VERSION
   s.authors     = ["Edgars Kaukis"]
   s.email       = ["e.kaukis@gmail.com"]
+  s.licenses    = ['MIT']
   s.homepage    = "https://github.com/ekaukis/api_notify"
   s.summary     = "ApiNotify allows to comunicate between two systems via API"
   s.description = "ApiNotify is an ActiveRecord extender. Based on model callbacks, api_notify knows if it needs to send request."
@@ -17,10 +18,10 @@ Gem::Specification.new do |s|
 
 
   s.add_development_dependency "bundler", "~> 1.5"
-  s.add_development_dependency "rake"
-  s.add_development_dependency "rails",       ">= 3.0"
+  s.add_development_dependency "rake",'~> 0'
+  s.add_development_dependency "rails", '~> 3.0'
   s.add_development_dependency "rspec-rails", "~> 2.0"
-  s.add_development_dependency 'database_cleaner'
-  s.add_development_dependency 'webmock'
-  s.add_development_dependency "sqlite3"
+  s.add_development_dependency 'database_cleaner','~> 0'
+  s.add_development_dependency 'webmock','~> 0'
+  s.add_development_dependency "sqlite3",'~> 0'
 end
