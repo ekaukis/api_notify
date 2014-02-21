@@ -4,7 +4,7 @@ describe ApiNotify::ActiveRecord::Main do
 
   let(:new_vehicle){ Vehicle.new }
   let(:vehicle) do
-    stub_request(:post, "http://example.com/api/v1/vehicles")
+    stub_request(:post, "https://example.com/api/v1/vehicles")
     .to_return(
       status: 201,
       body: '{

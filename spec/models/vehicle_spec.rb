@@ -2,14 +2,14 @@ require 'spec_helper'
 
 describe Vehicle do
   let(:vehicle) do
-    stub_request(:post, "http://example.com/api/v1/vehicles")
+    stub_request(:post, "https://example.com/api/v1/vehicles")
     .to_return(
       status: 201,
       body: '{
         "other": "New info"
       }',
       headers: {}
-    )
+    ).times(1)
     FactoryGirl.create(:vehicle, make: "AUDI", dealer_id: nil)
   end
 
@@ -19,7 +19,7 @@ describe Vehicle do
     end
 
     it "updates sales_price" do
-      stub_request(:post, "http://example.com/api/v1/vehicles/#{vehicle.id}"
+      stub_request(:post, "https://example.com/api/v1/vehicles"
         ).to_return(
           status: 201,
           body: '{
@@ -34,7 +34,7 @@ describe Vehicle do
     end
 
     it "destroys vehicle" do
-      stub_request(:delete, "http://example.com/api/v1/vehicles/#{vehicle.id}"
+      stub_request(:delete, "https://example.com/api/v1/vehicles/#{vehicle.id}"
         ).to_return(
           status: 204,
           body: '{
