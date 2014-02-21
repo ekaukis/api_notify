@@ -42,15 +42,17 @@ module ApiNotify
             end
           end
 
-          define_singleton_method :synchronizer do
+          define_singleton_method :route_name do
             begin
-              _api_route_name = api_route_name
-              ApiNotify::LOGGER.info "api_route_name2: #{api_route_name}"
+              return api_route_name.downcase
             rescue Exception => e
-              _api_route_name = class_name.pluralize
+              _name = defined?(class_name) ? class_name : name
+              return _name.pluralize.downcase
             end
+          end
 
-            ApiNotify::ActiveRecord::Synchronizer.new _api_route_name.downcase, identificators.keys.first
+          define_singleton_method :synchronizer do
+            ApiNotify::ActiveRecord::Synchronizer.new route_name, identificators.keys.first
           end
         end
 
@@ -69,13 +71,14 @@ module ApiNotify
       # Unless any attribute changed than dont send any request
       # if is_synchronized defined than check if its true, unless its true synchronize it
 
+      def must_sync
+        _must_sync = false
+        _must_sync = !send(self.class.is_synchronized) if defined? self.class.is_synchronized
+        _must_sync
+      end
+
       def attributes_as_params(method)
         _fields = {}
-        must_sync = false
-        if defined? self.class.is_synchronized
-          ApiNotify::LOGGER.info "Is synchronized: #{self.class.is_synchronized}"
-          must_sync = !send(self.class.is_synchronized)
-        end
 
         notify_attributes.each do |field|
           if send("#{field.to_s}_changed?") || must_sync
@@ -96,7 +99,6 @@ module ApiNotify
       def method_missing(m, *args)
         vars = m.to_s.split(/_/, 2)
         if METHODS.include?(vars.first) && vars.last == "via_api"
-          ApiNotify::LOGGER.info "called method: #{m}"
           return if skip_api_notify || attributes_as_params(vars.first).empty?
           synchronizer = self.class.synchronizer
           synchronizer.set_params(attributes_as_params(vars.first))
