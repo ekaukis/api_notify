@@ -13,18 +13,11 @@ module ApiNotify
       end
 
       def response
-        if @_response.body
-          _response = { status: @_response.code }
-          begin
-            _response[:body] = JSON.parse(@_response.body)
-          rescue
-            _response[:body] = @_response.body
-          end
-        else
-          _response = { status: "error" }
-          _response[:body] = @_response
+        begin
+          { status: @_response.code, body: JSON.parse(@_response.body)}
+        rescue
+          { status: "error", body: @_response }
         end
-        _response
       end
 
       def success?
