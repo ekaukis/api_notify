@@ -66,6 +66,16 @@ module ApiNotify
         self.skip_api_notify = false
       end
 
+      def save_without_api_notify
+        self.disable_api_notify
+        self.save
+      end
+
+      def update_attributes_without_api_notify attributes
+        self.disable_api_notify
+        self.update_attributes attributes
+      end
+
 
       # Check if any watched attribute changed
       # Unless any attribute changed than dont send any request
