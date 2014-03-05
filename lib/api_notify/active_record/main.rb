@@ -87,6 +87,11 @@ module ApiNotify
         _must_sync
       end
 
+      def no_need_to_synchronize?
+        return self.class.skip_synchronize if defined? self.class.skip_synchronize
+        false
+      end
+
       def attributes_as_params(method)
         _fields = {}
 
@@ -109,7 +114,7 @@ module ApiNotify
       def method_missing(m, *args)
         vars = m.to_s.split(/_/, 2)
         if METHODS.include?(vars.first) && vars.last == "via_api"
-          return if skip_api_notify || attributes_as_params(vars.first).empty?
+          return if skip_api_notify || attributes_as_params(vars.first).empty? || no_need_to_synchronize?
           synchronizer = self.class.synchronizer
           synchronizer.set_params(attributes_as_params(vars.first))
           synchronizer.send_request(vars.first.upcase)

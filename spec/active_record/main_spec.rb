@@ -50,6 +50,21 @@ describe ApiNotify::ActiveRecord::Main do
     end
   end
 
+  describe ".save_without_api_notify" do
+    it "saves without triggering api" do
+      vehicle.make = "VOLVO"
+      vehicle.save_without_api_notify
+      expect(vehicle.make).to eq("VOLVO")
+    end
+  end
+
+  describe ".update_attributes_without_api_notify" do
+    it "updates attributes without triggering api" do
+      vehicle.update_attributes_without_api_notify make: "VOLVO"
+      expect(vehicle.make).to eq("VOLVO")
+    end
+  end
+
   it "should be defined .identificators "
 
   it "should be defined .notify_attributes"
