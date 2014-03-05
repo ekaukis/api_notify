@@ -88,7 +88,7 @@ module ApiNotify
       end
 
       def no_need_to_synchronize?
-        return self.class.skip_synchronize if defined? self.class.skip_synchronize
+        return send(self.class.skip_synchronize) if defined? self.class.skip_synchronize
         false
       end
 
