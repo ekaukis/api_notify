@@ -66,9 +66,9 @@ module ApiNotify
         self.skip_api_notify = false
       end
 
-      def save_without_api_notify
+      def save_without_api_notify *args
         self.disable_api_notify if defined? self.skip_api_notify
-        self.save
+        self.save *args
       end
 
       def update_attributes_without_api_notify attributes
