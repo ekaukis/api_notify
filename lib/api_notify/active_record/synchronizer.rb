@@ -33,10 +33,10 @@ module ApiNotify
             http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           end
           _url = url_param ? build_url(url_param) : url(type)
-          ApiNotify::LOGGER.info "Request url: #{_url} | params: #{params_query}"
+          ApiNotify::LOGGER.info "Request url: #{@config["domain"]}#{_url} | params: #{params_query}"
           @_response = http.send_request(type, _url, params_query, headers)
           @_success = true
-          ApiNotify::LOGGER.info "#{@_response.code}: #{ @_response.body.truncate(200, separator: "\n")}"
+          ApiNotify::LOGGER.info "#{@_response.code}: #{ @_response.body.truncate(200, separator: "\n") if @_response.body}"
         rescue Exception => e
           @_response = {error: e}
           ApiNotify::LOGGER.error @_response[:error]
