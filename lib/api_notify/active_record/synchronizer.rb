@@ -15,8 +15,13 @@ module ApiNotify
       def response
         begin
           { status: @_response.code, body: JSON.parse(@_response.body)}
-        rescue
-          { status: "error", body: @_response }
+        rescue JSON::ParserError, NoMethodError => e
+          case e.class.name
+          when "NoMethodError"
+            { status: e.class.name, body: "#{e.message} | #{@_response[:error].message}" }
+          when "JSON::ParserError"
+            { status: e.class.name, body: "#{e.message} | #{@_response.body}" }
+          end
         end
       end
 
@@ -26,21 +31,19 @@ module ApiNotify
 
       def send_request(type = 'GET', url_param = false)
         begin
-          ApiNotify::LOGGER.info "Request Started"
           http = Net::HTTP.new(@config["domain"], @config["port"])
           if @config["port"].to_i == 443
             http.use_ssl = true
             http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           end
           _url = url_param ? build_url(url_param) : url(type)
-          ApiNotify::LOGGER.info "Request url: #{@config["domain"]}#{_url} | params: #{params_query}"
+          ApiNotify::LOGGER.info "Request #{@config["domain"]}:#{@config["port"]}#{_url}?#{params_query}"
           @_response = http.send_request(type, _url, params_query, headers)
           @_success = true
-          ApiNotify::LOGGER.info "#{@_response.code}: #{ @_response.body.truncate(200, separator: "\n") if @_response.body}"
         rescue Exception => e
           @_response = {error: e}
-          ApiNotify::LOGGER.error @_response[:error]
         end
+        log_response
         @_response
       end
 
@@ -74,6 +77,14 @@ module ApiNotify
         def load_config_yaml
           config_yaml = "#{Rails.root.to_s}/config/api_notify.yml"
           YAML.load_file(config_yaml)[Rails.env] if File.exists?(config_yaml)
+        end
+
+        def log_response
+          if %w(500 501 502 503 504 505 506).include? response[:status]
+            ApiNotify::LOGGER.info "Response #{response[:status]}: #{ response[:body].truncate(1000, separator: "\n") if response[:body].present?}\n"
+          else
+            ApiNotify::LOGGER.info "Response #{response[:status]}: #{ response[:body] }\n"
+          end
         end
     end
   end
