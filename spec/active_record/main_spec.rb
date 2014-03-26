@@ -37,6 +37,13 @@ describe ApiNotify::ActiveRecord::Main do
       end
     end
 
+    context "when :post_via_api" do
+      it "returns true" do
+        vehicle.dealer_id = nil
+        expect(vehicle.post_via_api).to be_false
+      end
+    end
+
     context "when .skip_api_notify is true or sending params are empty" do
       it "skips sending data"
     end
@@ -111,6 +118,28 @@ describe ApiNotify::ActiveRecord::Main do
 
       context "and method is delete" do
         it "returns hash with identificators"
+      end
+    end
+
+    context "when changed field value is nil" do
+      it "return attributes with empty value" do
+        vehicle.dealer_id = nil
+        expect(vehicle.attributes_as_params("post")).to eq({:dealer_id=>nil, :id => vehicle.id})
+      end
+    end
+
+    context "when changed field value is not present" do
+      it "return attributes with empty value" do
+        vehicle.dealer_id = ""
+        expect(vehicle.attributes_as_params("post")).to eq({:dealer_id=>nil, :id => vehicle.id})
+      end
+    end
+
+    context "when changed field value is present" do
+      it "returns normal params " do
+        dealer = FactoryGirl.create(:dealer_synchronized)
+        vehicle.dealer_id = dealer.id
+        expect(vehicle.attributes_as_params("post")).to eq({:dealer_id=>dealer.id, :id => vehicle.id})
       end
     end
 
