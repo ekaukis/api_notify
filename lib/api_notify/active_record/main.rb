@@ -113,6 +113,7 @@ module ApiNotify
       def method_missing(m, *args)
         vars = m.to_s.split(/_/, 2)
         if METHODS.include?(vars.first) && vars.last == "via_api"
+          return unless ApiNotify.configuration.active
           return if skip_api_notify || attributes_as_params(vars.first).empty? || no_need_to_synchronize?
           synchronizer = self.class.synchronizer
           synchronizer.set_params(attributes_as_params(vars.first))

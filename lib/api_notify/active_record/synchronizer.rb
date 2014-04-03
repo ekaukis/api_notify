@@ -75,7 +75,7 @@ module ApiNotify
 
       private
         def load_config_yaml
-          config_yaml = "#{Rails.root.to_s}/config/api_notify.yml"
+          config_yaml = ApiNotify.configuration.config_file
           YAML.load_file(config_yaml)[Rails.env] if File.exists?(config_yaml)
         end
 

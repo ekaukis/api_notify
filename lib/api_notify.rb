@@ -1,5 +1,6 @@
 require "api_notify/version"
 require "api_notify/hooks"
+require "api_notify/configuration"
 
 module ApiNotify
 
