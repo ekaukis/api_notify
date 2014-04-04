@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Vehicle do
   let(:dealer) { FactoryGirl.create(:dealer_synchronized) }
-
+  let(:vehicle_type) {FactoryGirl.build(:vehicle_type)}
   let(:vehicle) do
     stub_request(:post, "https://example.com/api/v1/vehicles")
     .to_return(
@@ -52,6 +52,30 @@ describe Vehicle do
 
       it "updates dealer_title" do
         expect(vehicle.dealer.title).to eq("Dealer title")
+      end
+
+      it "sends request" do
+        a_request(:any, "https://example.com/api/v1/vehicles").should have_been_made.times(2)
+      end
+    end
+
+    context "when vehicle_type changed" do
+      before do
+        stub_request(:post, "https://example.com/api/v1/vehicles"
+          ).to_return(
+            status: 201,
+            body: '{
+              "dealer_id": "12"
+            }',
+            headers: {}
+          )
+
+        vehicle.vehicle_type.title = "Vehicle title"
+        vehicle.save
+      end
+
+      it "updates dealer_title" do
+        expect(vehicle.vehicle_type.title).to eq("Vehicle title")
       end
 
       it "sends request" do
