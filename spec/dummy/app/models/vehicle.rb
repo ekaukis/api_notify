@@ -4,7 +4,7 @@ class Vehicle < ActiveRecord::Base
 
   belongs_to :dealer
 
-  api_notify [:no, :vin, :make, :dealer_id], { id: :id }
+  api_notify [:no, :vin, :make, :dealer_id, 'dealer.title'], { id: :id }
 
   def api_notify_post_success response
     self.other = response[:body]["other"]

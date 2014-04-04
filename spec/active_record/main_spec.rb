@@ -2,7 +2,8 @@ require "spec_helper"
 
 describe ApiNotify::ActiveRecord::Main do
 
-  let(:new_vehicle){ Vehicle.new }
+  let(:dealer) { FactoryGirl.create(:dealer_synchronized) }
+  let(:new_vehicle){ Vehicle.new(dealer_id: dealer.id) }
   let(:vehicle) do
     stub_request(:post, "https://example.com/api/v1/vehicles")
     .to_return(
@@ -12,7 +13,7 @@ describe ApiNotify::ActiveRecord::Main do
       }',
       headers: {}
     )
-    FactoryGirl.create(:vehicle)
+    FactoryGirl.create(:vehicle, dealer_id: dealer.id)
   end
 
   describe ".method_missing" do

@@ -96,18 +96,32 @@ module ApiNotify
         _fields = {}
 
         notify_attributes.each do |field|
-          if send("#{field.to_s}_changed?") || must_sync
-            _fields[field] = self.send(field)
+          if field_changed?(field) || must_sync
+            _fields[field] = get_value(field)
           end
         end
 
         return _fields if _fields.empty? && method != "delete"
 
         identificators.each_pair do |key, value|
-          _fields[key] = self.send(value)
+          _fields[key] = get_value(value)
         end
 
         _fields
+      end
+
+      def get_value(field)
+        "#{field.to_s}".split('.').inject(self) { |obj, method| obj.present? ? obj.send(method) : "" }
+      end
+
+      def field_changed?(field)
+        "#{field.to_s}_changed?".split('.').inject(self) do |obj, method|
+          if obj.present?
+            obj.send(method)
+          else
+            false
+          end
+        end
       end
 
       def method_missing(m, *args)
