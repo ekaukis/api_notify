@@ -6,6 +6,7 @@ FactoryGirl.define do
     make "VW"
     association :dealer, :factory => :dealer_synchronized
     other "some other field"
+    association :vehicle_type, :factory => :vehicle_type
   end
 
 end
