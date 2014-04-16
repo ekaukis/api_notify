@@ -90,25 +90,30 @@ module ApiNotify
         _must_sync
       end
 
-      def no_need_to_synchronize?
-        return send(self.class.skip_synchronize) if defined? self.class.skip_synchronize
+      def no_need_to_synchronize?(method)
+        if defined? self.class.skip_synchronize
+          return true if send(self.class.skip_synchronize)
+        end
+
+        if method != "delete" && attributes_changed.empty?
+          return true
+        end
+
         false
       end
 
-      def attributes_as_params(method)
-        _fields = {}
-        notify_attributes.each do |field|
+      def attributes_as_params
+        notify_attributes.inject({}) do |_fields, field|
           if field_changed?(field) || must_sync
             _fields[field] = get_value(field)
           end
+          _fields
         end
+      end
 
-        return _fields if _fields.empty? && method != "delete"
-
-        identificators.each_pair do |key, value|
-          _fields[key] = get_value(value)
-        end
-
+      def get_identificators
+        _fields = {}
+        identificators.each_pair { |key, value| _fields[key] = get_value(value) }
         _fields
       end
 
@@ -126,13 +131,17 @@ module ApiNotify
         end
       end
 
+      def set_attributes_changed
+        @attributes_changed = attributes_as_params
+      end
+
       def method_missing(m, *args)
         vars = m.to_s.split(/_/, 2)
         if METHODS.include?(vars.first) && vars.last == "via_api"
           return unless ApiNotify.configuration.active
-          return if skip_api_notify || attributes_changed.empty? || no_need_to_synchronize?
+          return if skip_api_notify || no_need_to_synchronize?(vars.first)
           synchronizer = self.class.synchronizer
-          synchronizer.set_params(attributes_changed)
+          synchronizer.set_params(attributes_changed.merge(get_identificators))
           synchronizer.send_request(vars.first.upcase)
 
           disable_api_notify
@@ -145,7 +154,7 @@ module ApiNotify
 
           enable_api_notify
         elsif METHODS.include?(vars.first) && vars.last == "gather_changes"
-          @attributes_changed = attributes_as_params(vars.first)
+          set_attributes_changed
         else
           super
         end
