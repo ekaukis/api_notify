@@ -1,3 +1,8 @@
 = ApiNotify
 
-This project rocks and uses MIT-LICENSE.
+Makes API connection betwean two systems. 
+
+Coming soon:
+* Basic usage
+* Config file generator
+* Credentials yml genetrator
