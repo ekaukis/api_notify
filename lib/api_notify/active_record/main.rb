@@ -12,16 +12,9 @@ module ApiNotify
 
       module ClassMethods
         def api_notify(fields, identificators, *args)
-          options = args.extract_options!
-
-          after_update :post_via_api
-          after_create :post_via_api
-          after_destroy :delete_via_api
-          before_update :post_gather_changes
-          before_create :post_gather_changes
-          before_destroy :delete_gather_changes
-
           attr_accessor :skip_api_notify, :attributes_changed
+
+          set_callbacks
 
           define_method :notify_attributes do
             fields
@@ -31,6 +24,22 @@ module ApiNotify
             identificators
           end
 
+          define_default_callback_methods
+          define_options_methods args.extract_options!
+          define_route_name_method
+          define_synchronizer_method identificators
+        end
+
+        def set_callbacks
+          after_update :post_via_api
+          after_create :post_via_api
+          after_destroy :delete_via_api
+          before_update :post_gather_changes
+          before_create :post_gather_changes
+          before_destroy :delete_gather_changes
+        end
+
+        def define_default_callback_methods
           METHODS.each do |method|
             define_method "api_notify_#{method}_success" do |response|
             end
@@ -38,13 +47,21 @@ module ApiNotify
             define_method "api_notify_#{method}_failed" do |response|
             end
           end
+        end
 
+        def define_options_methods options
           options.each_pair do |key, value|
             define_singleton_method key do
               value
             end
           end
+        end
 
+        # def define_attribute_methods fields, identificators
+        #
+        # end
+
+        def define_route_name_method
           define_singleton_method :route_name do
             begin
               return api_route_name.downcase
@@ -53,7 +70,9 @@ module ApiNotify
               return _name.pluralize.downcase
             end
           end
+        end
 
+        def define_synchronizer_method identificators
           define_singleton_method :synchronizer do
             ApiNotify::ActiveRecord::Synchronizer.new route_name, identificators.keys.first
           end
