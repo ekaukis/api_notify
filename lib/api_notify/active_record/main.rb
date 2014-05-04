@@ -110,6 +110,8 @@ module ApiNotify
       end
 
       def no_need_to_synchronize?(method)
+        return true if skip_api_notify
+
         if defined? self.class.skip_synchronize
           return true if send(self.class.skip_synchronize)
         end
@@ -150,30 +152,36 @@ module ApiNotify
         end
       end
 
+      def synchronize method
+        synchronizer = self.class.synchronizer
+        synchronizer.set_params(attributes_changed.merge(get_identificators))
+        synchronizer.send_request(method.upcase)
+
+        disable_api_notify
+
+        if synchronizer.success?
+          send("api_notify_#{method}_success", synchronizer.response)
+        else
+          send("api_notify_#{method}_failed", synchronizer.response)
+        end
+
+        enable_api_notify
+      end
+
       def set_attributes_changed
         @attributes_changed = attributes_as_params
       end
 
       def method_missing(m, *args)
         vars = m.to_s.split(/_/, 2)
-        if METHODS.include?(vars.first) && vars.last == "via_api"
+        if METHODS.include?(vars.first)
           return unless ApiNotify.configuration.active
-          return if skip_api_notify || no_need_to_synchronize?(vars.first)
-          synchronizer = self.class.synchronizer
-          synchronizer.set_params(attributes_changed.merge(get_identificators))
-          synchronizer.send_request(vars.first.upcase)
-
-          disable_api_notify
-
-          if synchronizer.success?
-            send("api_notify_#{vars.first}_success", synchronizer.response)
-          else
-            send("api_notify_#{vars.first}_failed", synchronizer.response)
+          case vars.last
+          when "via_api"
+            synchronize vars.first unless no_need_to_synchronize?(vars.first)
+          when "gather_changes"
+            set_attributes_changed
           end
-
-          enable_api_notify
-        elsif METHODS.include?(vars.first) && vars.last == "gather_changes"
-          set_attributes_changed
         else
           super
         end
