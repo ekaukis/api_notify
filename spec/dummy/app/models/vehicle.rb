@@ -1,7 +1,5 @@
 class Vehicle < ActiveRecord::Base
 
-  attr_accessible :no, :vin, :make, :dealer_id, :other
-
   belongs_to :dealer
   has_one :vehicle_type
 

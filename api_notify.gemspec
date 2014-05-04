@@ -19,11 +19,11 @@ Gem::Specification.new do |s|
   s.test_files    = s.files.grep(/^spec\//)
   s.require_path = "lib"
 
-  s.add_development_dependency "rails",               '~> 3.0'
-  s.add_development_dependency "rspec-rails",         "~> 2.10"
-  s.add_development_dependency "factory_girl_rails",  "~> 4.4"
-  s.add_development_dependency 'simplecov',           '~> 0.7.1'
-  s.add_development_dependency 'database_cleaner',    '~> 0.8.0'
-  s.add_development_dependency 'webmock',             '~> 1.0'
-  s.add_development_dependency "sqlite3",             "~> 1.3.8"
+  s.add_development_dependency "rails",               '~> 4.0.4'
+  s.add_development_dependency "rspec-rails"
+  s.add_development_dependency "factory_girl_rails"
+  s.add_development_dependency 'simplecov'
+  s.add_development_dependency 'database_cleaner'
+  s.add_development_dependency 'webmock'
+  s.add_development_dependency "sqlite3"
 end
