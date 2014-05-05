@@ -57,10 +57,6 @@ module ApiNotify
           end
         end
 
-        # def define_attribute_methods fields, identificators
-        #
-        # end
-
         def define_route_name_method
           define_singleton_method :route_name do
             begin
@@ -98,29 +94,10 @@ module ApiNotify
         self.update_attributes attributes
       end
 
-
-      # Check if any watched attribute changed
-      # Unless any attribute changed than dont send any request
-      # if is_synchronized defined than check if its true, unless its true synchronize it
-
       def must_sync
         _must_sync = false
         _must_sync = !send(self.class.is_synchronized) if defined? self.class.is_synchronized
         _must_sync
-      end
-
-      def no_need_to_synchronize?(method)
-        return true if skip_api_notify
-
-        if defined? self.class.skip_synchronize
-          return true if send(self.class.skip_synchronize)
-        end
-
-        if method != "delete" && attributes_changed.empty?
-          return true
-        end
-
-        false
       end
 
       def attributes_as_params
@@ -170,6 +147,20 @@ module ApiNotify
 
       def set_attributes_changed
         @attributes_changed = attributes_as_params
+      end
+
+      def no_need_to_synchronize?(method)
+        return true if skip_api_notify
+
+        if defined? self.class.skip_synchronize
+          return true if send(self.class.skip_synchronize)
+        end
+
+        if method != "delete" && attributes_changed.empty?
+          return true
+        end
+
+        false
       end
 
       def method_missing(m, *args)
