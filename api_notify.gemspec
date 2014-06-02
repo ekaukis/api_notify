@@ -19,7 +19,11 @@ Gem::Specification.new do |s|
   s.test_files    = s.files.grep(/^spec\//)
   s.require_path = "lib"
 
-  s.add_development_dependency "rails",               '~> 4.0.4'
+  # s.add_development_dependency "sidekiq",           '~> 2.17.0'
+  # s.add_development_dependency "sidekiq-cron",      "~> 0.1.0"
+  s.add_development_dependency "rails",             '~> 4.0.5'
+  # s.add_development_dependency "fakeredis"
+  # s.add_development_dependency "rspec-sidekiq"
   s.add_development_dependency "rspec-rails"
   s.add_development_dependency "factory_girl_rails"
   s.add_development_dependency 'simplecov'

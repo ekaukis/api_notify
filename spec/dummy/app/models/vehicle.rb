@@ -10,7 +10,12 @@ class Vehicle < ActiveRecord::Base
     :dealer_id,
     'dealer.title',
     'vehicle_type.title'
-  ], { id: :id }, skip_synchronize: :dont_do_synchronize
+  ],
+  {
+    id: :id
+  },
+  skip_synchronize: :dont_do_synchronize,
+  endpoints: [:dealer, :other]
 
   attr_accessor :dont_do_synchronize
 
