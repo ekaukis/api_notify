@@ -19,21 +19,21 @@ describe ApiNotify::ActiveRecord::Main do
   describe ".method_missing" do
     context "when affter_create triggered" do
       it "receivs post_via_api" do
-        new_vehicle.should_receive(:post_via_api)
+        expect(new_vehicle).to receive(:post_via_api)
         new_vehicle.save!
       end
     end
 
     context "when affter_update triggered" do
       it "receivs post_via_api" do
-        vehicle.should_receive(:post_via_api)
+        expect(vehicle).to receive(:post_via_api)
         vehicle.save!
       end
     end
 
     context "when affter_destroy triggered" do
       it "receivs delete_via_api" do
-        vehicle.should_receive(:delete_via_api)
+        expect(vehicle).to receive(:delete_via_api)
         vehicle.destroy
       end
     end

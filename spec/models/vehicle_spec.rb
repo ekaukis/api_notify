@@ -55,7 +55,7 @@ describe Vehicle do
       end
 
       it "sends request" do
-        a_request(:any, "https://example.com/api/v1/vehicles").should have_been_made.times(2)
+        expect(a_request(:any, "https://example.com/api/v1/vehicles")).to have_been_made.times(2)
       end
     end
 
@@ -79,7 +79,7 @@ describe Vehicle do
       end
 
       it "sends request" do
-        a_request(:any, "https://example.com/api/v1/vehicles").should have_been_made.times(2)
+        expect(a_request(:any, "https://example.com/api/v1/vehicles")).to have_been_made.times(2)
       end
     end
 

@@ -17,19 +17,19 @@ describe ApiNotify::Configuration do
   context "when api_notify active" do
     it "receivs post_via_api" do
       vehicle.save
-      a_request(:post, "https://example.com/api/v1/vehicles").should have_been_made
+      expect(a_request(:post, "https://example.com/api/v1/vehicles")).to have_been_made
     end
   end
 
   context "when api_notify disabled" do
     before do
-      ApiNotify.configuration.stub("active").and_return(false)
-      ApiNotify.configuration.stub("config_file").and_return(false)
+      allow(ApiNotify.configuration).to receive(:active).and_return(false)
+      allow(ApiNotify.configuration).to receive(:config_file).and_return(false)
     end
 
     it "doesn't receivs post_via_api" do
       vehicle.save
-      a_request(:post, "https://example.com/api/v1/vehicles").should_not have_been_made
+      expect(a_request(:post, "https://example.com/api/v1/vehicles")).to have_not_been_made
     end
   end
 end
