@@ -1,8 +1,0 @@
-= ApiNotify
-
-Makes API connection betwean two systems. 
-
-Coming soon:
-* Basic usage
-* Config file generator
-* Credentials yml genetrator
