@@ -27,7 +27,7 @@ describe ApiNotify::ActiveRecord::Synchronizer do
   end
 
   describe ".initialize" do
-    it "defines instance variable"
+
   end
 
   describe ".response" do

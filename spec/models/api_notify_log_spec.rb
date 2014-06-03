@@ -1,5 +1,7 @@
 require 'spec_helper'
 
 describe ApiNotifyLog do
-  pending "add some examples to (or delete) #{__FILE__}"
+  describe "ActiveRecord associations" do
+    it { expect(subject).to belong_to(:api_notify_logable) }
+  end
 end

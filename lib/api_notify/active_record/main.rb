@@ -11,8 +11,8 @@ module ApiNotify
       METHODS = %w[post get delete put]
 
       included do
-        has_many :api_notify_tasks, as: :api_notify_logable
-        has_many :api_notify_logs, as: :api_notifiable
+        has_one :api_notify_log, as: :api_notify_logable
+        has_many :api_notify_tasks, as: :api_notifiable
       end
 
       module ClassMethods

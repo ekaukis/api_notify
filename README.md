@@ -1,5 +1,4 @@
 [![Code Climate](https://codeclimate.com/github/ekaukis/api_notify.png)](https://codeclimate.com/github/ekaukis/api_notify)
-[![Build Status](https://travis-ci.org/ekaukis/api_notify.svg?branch=multiple_endpoints)](https://travis-ci.org/ekaukis/api_notify)
 
 # API notify
 

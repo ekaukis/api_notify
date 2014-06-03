@@ -1,5 +1,7 @@
 require 'spec_helper'
 
 describe VehicleType do
-  pending "add some examples to (or delete) #{__FILE__}"
+  describe "ActiveRecord associations" do
+    it { expect(subject).to belong_to(:vehicle) }
+  end
 end

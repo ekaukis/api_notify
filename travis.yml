@@ -1,0 +1,5 @@
+deploy:
+  provider: modulus
+  api-key: "lN3sj4in3gPy8qkX4uqjwp2tMYht1ESw7arSf8T0uPPLUb/fccvuyi/PgjV8jcsuzrKUYcrqBKgE/Mvh0Hxg6mTq1ai3MQPj2sF/khiBziwDX+rP5sDjKjfUy9oAyL09gwuxiR/C+FMdRVEKA4a1pnvh7HE2ENwTmQbXQ/QAIbY="
+  project-name: Api notify
+language: "ruby"

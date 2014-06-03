@@ -9,6 +9,7 @@ require File.expand_path("../dummy/config/environment", __FILE__)
 require 'sidekiq/testing'
 require 'database_cleaner'
 require 'rspec/rails'
+require 'shoulda/matchers'
 require 'webmock/rspec'
 require 'factory_girl_rails'
 require 'fakeredis'
@@ -19,6 +20,7 @@ ActiveRecord::Migration.check_pending! if defined?(ActiveRecord::Migration)
 
 RSpec.configure do |config|
   config.color = true
+  config.formatter = :documentation # :progress, :html, :textmate
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
   config.use_transactional_fixtures = false
   config.infer_base_class_for_anonymous_controllers = false
