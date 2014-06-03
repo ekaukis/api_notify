@@ -154,6 +154,14 @@ module ApiNotify
         @attributes_changed = attributes_as_params
       end
 
+      def create_task endpoint, method
+        api_notify_tasks.create({
+          fields_updated: attributes_changed,
+          endpoint: endpoint,
+          method: method
+        })
+      end
+
       def no_need_to_synchronize?(method)
         return true if skip_api_notify
 
@@ -175,6 +183,7 @@ module ApiNotify
           case vars.last
           when "via_api"
             synchronize vars.first unless no_need_to_synchronize?(vars.first)
+            create_task "dealer", vars.first
           when "gather_changes"
             set_attributes_changed
           end

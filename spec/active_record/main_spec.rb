@@ -3,17 +3,13 @@ require "spec_helper"
 describe ApiNotify::ActiveRecord::Main do
 
   let(:dealer) { FactoryGirl.create(:dealer_synchronized) }
-  let(:new_vehicle){ Vehicle.new(dealer_id: dealer.id) }
-  let(:vehicle) do
-    # stub_request(:post, "https://example.com/api/v1/vehicles")
-    # .to_return(
-    #   status: 201,
-    #   body: '{
-    #     "other": "New info"
-    #   }',
-    #   headers: {}
-    # )
-    FactoryGirl.create(:vehicle, dealer_id: dealer.id)
+  let(:new_vehicle) { Vehicle.new(dealer_id: dealer.id) }
+  let(:vehicle) { FactoryGirl.create(:vehicle, dealer_id: dealer.id) }
+
+  describe "Allowed methods" do
+    it "returns post, delete, get and put" do
+      expect(subject::METHODS).to eq(%w[post get delete put])
+    end
   end
 
   describe ".method_missing" do

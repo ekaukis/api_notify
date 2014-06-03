@@ -3,8 +3,9 @@ class CreateApiNotifyTasks < ActiveRecord::Migration
     create_table :api_notify_tasks do |t|
       t.text :fields_updated
       t.references :api_notifiable, polymorphic: true
-      t.text :synchronized_to
-      t.boolean :synchronized
+      t.string :endpoint
+      t.string :method
+      t.boolean :done, default: false
 
       t.timestamps
     end

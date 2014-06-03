@@ -25,8 +25,9 @@ ActiveRecord::Schema.define(version: 20140602120014) do
     t.text     "fields_updated"
     t.integer  "api_notifiable_id"
     t.string   "api_notifiable_type"
-    t.text     "synchronized_to"
-    t.boolean  "synchronized"
+    t.string   "endpoint"
+    t.string   "method"
+    t.boolean  "done",                default: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end

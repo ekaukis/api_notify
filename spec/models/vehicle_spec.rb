@@ -2,6 +2,8 @@ require 'spec_helper'
 
 describe Vehicle do
 
+  it_behaves_like "an Api Notified includer"
+
   describe "ActiveRecord associations" do
     it { expect(subject).to have_one(:vehicle_type) }
     it { expect(subject).to belong_to(:dealer) }
@@ -9,6 +11,7 @@ describe Vehicle do
     it { expect(subject).to have_one(:api_notify_log) }
     it { expect(subject).to have_many(:api_notify_tasks) }
   end
+
   # let(:dealer) { FactoryGirl.create(:dealer_synchronized) }
 #   let(:vehicle_type) {FactoryGirl.build(:vehicle_type)}
 #   let(:subject) do
