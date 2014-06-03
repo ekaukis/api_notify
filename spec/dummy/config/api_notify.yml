@@ -1,11 +1,11 @@
 test:
-  dealer:
-    domain: example.com
-    port: 443
-    base_path: /api/v1
-    api_key: 8wdsddsuTn0D4fYL
-  other:
-    domain: other.example.com
-    port: 443
-    base_path: /api/v1
-    api_key: 8wdsd343uTn0D4fYL
+  # dealer:
+  domain: example.com
+  port: 443
+  base_path: /api/v1
+  api_key: 8wdsddsuTn0D4fYL
+  # other:
+  #   domain: other.example.com
+  #   port: 443
+  #   base_path: /api/v1
+  #   api_key: 8wdsd343uTn0D4fYL

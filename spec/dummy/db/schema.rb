@@ -14,18 +14,17 @@
 ActiveRecord::Schema.define(version: 20140602120014) do
 
   create_table "api_notify_logs", force: true do |t|
-    t.integer  "item_id"
+    t.integer  "api_notify_logable_id"
+    t.string   "api_notify_logable_type"
     t.string   "endpoint"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  add_index "api_notify_logs", ["item_id"], name: "index_api_notify_logs_on_item_id"
-
   create_table "api_notify_tasks", force: true do |t|
     t.text     "fields_updated"
-    t.integer  "notifiable_id"
-    t.string   "notifiable_type"
+    t.integer  "api_notifiable_id"
+    t.string   "api_notifiable_type"
     t.text     "synchronized_to"
     t.boolean  "synchronized"
     t.datetime "created_at"

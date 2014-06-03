@@ -10,6 +10,11 @@ module ApiNotify
 
       METHODS = %w[post get delete put]
 
+      included do
+        has_many :api_notify_tasks, as: :api_notify_logable
+        has_many :api_notify_logs, as: :api_notifiable
+      end
+
       module ClassMethods
         def api_notify(fields, identificators, *args)
           attr_accessor :skip_api_notify, :attributes_changed
