@@ -68,10 +68,13 @@ Both tables have polymorphic assosiation with api_notified models.
 ### api_notify_tasks
  * fields_updated - text (serialized hash)
  * api_notifiable - polymorphic fields combination ( points to api_notify model )
- * synchronized_to - text (serialized hash, that stores every endpoint with synchronized status)
- * synchronized - boolean (true if all synchronization endpoints are true)
+ * endpoint - string
+ * done - boolean (true if synchronization succeded)
+ * response - text (json or message from endpoint)
 
 ### api_notify_log
+  Only one record for one api_notified instance
+
  * api_notify_logable - polymorphic fields combination ( points to api_notify model )
  * endpoint - on which endpoint it is synchronized
 

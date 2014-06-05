@@ -1,7 +1,13 @@
-class SynchronizerWorker
-  include Sidekiq::Worker
+module ApiNotify
+  module Workers
+    class SynchronizerWorker
+      include Sidekiq::Worker
 
-  def perform(task_id)
-    puts "Do something"
+
+      def perform(id)
+        task = ApiNotifyTask.find(id)
+        task.synchronize
+      end
+    end
   end
 end

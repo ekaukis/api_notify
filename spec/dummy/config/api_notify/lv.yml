@@ -1,5 +1,0 @@
-test:
-  domain: example.com
-  port: 443
-  base_path: /api/v1
-  api_key: 8wdsddsuTn0D4fYL

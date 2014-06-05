@@ -5,6 +5,7 @@ class CreateApiNotifyTasks < ActiveRecord::Migration
       t.references :api_notifiable, polymorphic: true
       t.string :endpoint
       t.string :method
+      t.text :response
       t.boolean :done, default: false
 
       t.timestamps

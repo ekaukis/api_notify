@@ -5,7 +5,6 @@ module ApiNotify
       require 'net/https'
 
       def initialize route_name, id_param
-        @config = load_config_yaml
         @_params = {}
         @route_name = route_name
         @_success = false
@@ -29,7 +28,8 @@ module ApiNotify
         @_success
       end
 
-      def send_request(type = 'GET', url_param = false)
+      def send_request(type = 'GET', url_param = false, endpoint)
+        @config = load_config_yaml(endpoint)
         begin
           http = Net::HTTP.new(@config["domain"], @config["port"])
           if @config["port"].to_i == 443
@@ -74,9 +74,9 @@ module ApiNotify
       end
 
       private
-        def load_config_yaml
+        def load_config_yaml endpoint
           config_yaml = ApiNotify.configuration.config_file
-          YAML.load_file(config_yaml)[Rails.env] if File.exists?(config_yaml)
+          YAML.load_file(config_yaml)[Rails.env][endpoint] if File.exists?(config_yaml)
         end
 
         def log_response

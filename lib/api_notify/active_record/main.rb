@@ -2,6 +2,7 @@ require 'active_support/concern'
 require 'active_support/core_ext/array/extract_options'
 require 'active_support/deprecation/reporting'
 require "api_notify/active_record/synchronizer"
+require "api_notify/workers/synchronizer_worker"
 
 module ApiNotify
   module ActiveRecord
@@ -10,16 +11,12 @@ module ApiNotify
 
       METHODS = %w[post get delete put]
 
-      included do
-        has_one :api_notify_log, as: :api_notify_logable
-        has_many :api_notify_tasks, as: :api_notifiable
-      end
-
       module ClassMethods
         def api_notify(fields, identificators, *args)
-          attr_accessor :skip_api_notify, :attributes_changed
+          attr_accessor :skip_api_notify, :attributes_changed, :fields_changed
 
           set_callbacks
+          set_associations
 
           define_method :notify_attributes do
             fields
@@ -42,6 +39,11 @@ module ApiNotify
           before_update :post_gather_changes
           before_create :post_gather_changes
           before_destroy :delete_gather_changes
+        end
+
+        def set_associations
+          has_one :api_notify_log, as: :api_notify_logable
+          has_many :api_notify_tasks, as: :api_notifiable
         end
 
         def define_default_callback_methods
@@ -105,6 +107,15 @@ module ApiNotify
         _must_sync
       end
 
+      def fields_to_change
+        notify_attributes.inject([]) do |_fields, field|
+          if field_changed?(field) || must_sync
+            _fields << field
+          end
+          _fields
+        end
+      end
+
       def attributes_as_params
         notify_attributes.inject({}) do |_fields, field|
           if field_changed?(field) || must_sync
@@ -134,32 +145,22 @@ module ApiNotify
         end
       end
 
-      def synchronize method
-        synchronizer = self.class.synchronizer
-        synchronizer.set_params(attributes_changed.merge(get_identificators))
-        synchronizer.send_request(method.upcase)
-
-        disable_api_notify
-
-        if synchronizer.success?
-          send("api_notify_#{method}_success", synchronizer.response)
-        else
-          send("api_notify_#{method}_failed", synchronizer.response)
-        end
-
-        enable_api_notify
-      end
-
       def set_attributes_changed
         @attributes_changed = attributes_as_params
       end
 
+      def set_fields_changed
+        @fields_changed = fields_to_change
+      end
+
       def create_task endpoint, method
-        api_notify_tasks.create({
-          fields_updated: attributes_changed,
+        task = api_notify_tasks.create({
+          fields_updated: fields_changed,
           endpoint: endpoint,
           method: method
         })
+
+        ApiNotify::Workers::SynchronizerWorker.perform_async(task.id)
       end
 
       def no_need_to_synchronize?(method)
@@ -182,10 +183,9 @@ module ApiNotify
           return unless ApiNotify.configuration.active
           case vars.last
           when "via_api"
-            synchronize vars.first unless no_need_to_synchronize?(vars.first)
-            create_task "dealer", vars.first
+            create_task "dealer", vars.first #unless no_need_to_synchronize?(vars.first)
           when "gather_changes"
-            set_attributes_changed
+            set_fields_changed
           end
         else
           super

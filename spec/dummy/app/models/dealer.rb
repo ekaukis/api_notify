@@ -8,6 +8,8 @@ class Dealer < ActiveRecord::Base
     {
       other_system_id: :id
     },
-    is_synchronized: :synchronized,
-    endpoints: [:dealer]
+    endpoints: [
+      :dealer
+
+    ]
 end

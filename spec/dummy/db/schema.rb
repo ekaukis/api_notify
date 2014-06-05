@@ -27,6 +27,7 @@ ActiveRecord::Schema.define(version: 20140602120014) do
     t.string   "api_notifiable_type"
     t.string   "endpoint"
     t.string   "method"
+    t.text     "response"
     t.boolean  "done",                default: false
     t.datetime "created_at"
     t.datetime "updated_at"

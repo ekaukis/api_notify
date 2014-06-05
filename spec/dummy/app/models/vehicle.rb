@@ -15,7 +15,18 @@ class Vehicle < ActiveRecord::Base
     id: :id
   },
   skip_synchronize: :dont_do_synchronize,
-  endpoints: [:dealer, :other]
+  endpoints: [
+    {
+      name: :one,
+      skip_syncronize: :dont_do_synchronize,
+      is_synchronized: :synchronized
+    },
+    {
+      name: :other,
+      skip_syncronize: :dont_do_synchronize,
+      is_synchronized: :synchronized
+    }
+  ]
 
   attr_accessor :dont_do_synchronize
 
