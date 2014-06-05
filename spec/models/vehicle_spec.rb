@@ -16,16 +16,94 @@ describe Vehicle do
     describe ".set_fields_changed" do
       it "sets fields_changed" do
         subject.set_fields_changed
-        expect(subject.fields_changed).to eq([:no, :vin, :make, :dealer_id])
+        expect(subject.fields_changed(:one)).to eq([:no, :vin, :make, :dealer_id, "dealer.title", "vehicle_type.title"])
+        expect(subject.fields_changed(:other)).to eq([:no, :vin, :make, :dealer_id, "dealer.title", "vehicle_type.title"])
       end
     end
 
     describe "#via_api" do
       it "creates api_notify_task" do
-        expect{subject.save}.to change{ApiNotifyTask.all.size}.from(0).to(2)
+        expect{subject.save}.to change{ApiNotifyTask.all.size}.from(0).to(3)
       end
     end
   end
+
+  describe ".no_need_to_synchronize?" do
+    let(:vehicle) { FactoryGirl.create(:vehicle) }
+    let(:dealer) { FactoryGirl.create(:dealer_synchronized) }
+
+    before {Sidekiq::Testing.inline!}
+
+    context "when skip_synchronize is true" do
+      it "returns true" do
+        vehicle.vin = "2131232"
+        vehicle.set_fields_changed
+        vehicle.one_dont_do_synchronize = true
+        expect(vehicle.no_need_to_synchronize?('post', :one)).to eq(true)
+      end
+    end
+
+    context "when skip_synchronize is false" do
+      context "and attributes changed not empty" do
+        it "returns false" do
+          vehicle.vin = "2131232"
+          vehicle.set_fields_changed
+          vehicle.one_dont_do_synchronize = false
+          expect(vehicle.no_need_to_synchronize?('post', :one)).to eq(false)
+        end
+      end
+
+      context "and attributes changed is empty with method delete" do
+        it "returns false" do
+          vehicle.set_fields_changed
+          vehicle.one_dont_do_synchronize = false
+          expect(vehicle.no_need_to_synchronize?('delete', :one)).to eq(false)
+        end
+      end
+
+      context "and attributes changed is empty with other method" do
+        it "returns true" do
+          vehicle.set_fields_changed
+          vehicle.one_dont_do_synchronize = false
+          expect(vehicle.no_need_to_synchronize?('post', :one)).to eq(true)
+        end
+      end
+    end
+
+    context "when skip_synchronize not defined" do
+      context "and attributes changed not empty" do
+        it "returns false" do
+          dealer.title = "DDT"
+          dealer.set_fields_changed
+          expect(dealer.no_need_to_synchronize?('post', :one)).to eq(false)
+        end
+      end
+
+      context "and attributes changed is empty with method delete" do
+        it "returns false" do
+          dealer.set_fields_changed
+          expect(dealer.no_need_to_synchronize?('delete', :one)).to eq(false)
+        end
+      end
+
+      context "and attributes changed is empty with other method" do
+        it "return true" do
+          dealer.set_fields_changed
+          expect(dealer.no_need_to_synchronize?('post', :one)).to eq(true)
+        end
+      end
+    end
+
+    # context "when must synch is true", pending: true do
+    #   it "returns false" do
+    #     dealer.synchronized = false
+    #     dealer.set_fields_changed
+    #     expect(dealer.no_need_to_synchronize?('post', :one)).to eq(false)
+    #   end
+    # end
+
+  end
+
 #
 #
 #   context "when :post_via_api" do
@@ -75,79 +153,6 @@ describe Vehicle do
 #     end
 #   end
 #
-#   describe ".no_need_to_synchronize?" do
-#     let(:vehicle) { FactoryGirl.create(:vehicle) }
-#     let(:dealer) { FactoryGirl.create(:dealer_synchronized) }
-#
-#     context "when skip_synchronize is true" do
-#       it "returns true" do
-#         vehicle.vin = "2131232"
-#         vehicle.set_attributes_changed
-#         vehicle.dont_do_synchronize = true
-#         expect(vehicle.no_need_to_synchronize?('post')).to eq(true)
-#       end
-#     end
-#
-#     context "when skip_synchronize is false" do
-#       context "and attributes changed not empty" do
-#         it "returns false" do
-#           vehicle.vin = "2131232"
-#           vehicle.set_attributes_changed
-#           vehicle.dont_do_synchronize = false
-#           expect(vehicle.no_need_to_synchronize?('post')).to eq(false)
-#         end
-#       end
-#
-#       context "and attributes changed is empty with method delete" do
-#         it "returns false" do
-#           vehicle.set_attributes_changed
-#           vehicle.dont_do_synchronize = false
-#           expect(vehicle.no_need_to_synchronize?('delete')).to eq(false)
-#         end
-#       end
-#
-#       context "and attributes changed is empty with other method" do
-#         it "returns true" do
-#           vehicle.set_attributes_changed
-#           vehicle.dont_do_synchronize = false
-#           expect(vehicle.no_need_to_synchronize?('post')).to eq(true)
-#         end
-#       end
-#     end
-#
-#     context "when skip_synchronize not defined" do
-#       context "and attributes changed not empty" do
-#         it "returns false" do
-#           dealer.title = "DDT"
-#           dealer.set_attributes_changed
-#           expect(dealer.no_need_to_synchronize?('post')).to eq(false)
-#         end
-#       end
-#
-#       context "and attributes changed is empty with method delete" do
-#         it "returns false" do
-#           dealer.set_attributes_changed
-#           expect(dealer.no_need_to_synchronize?('delete')).to eq(false)
-#         end
-#       end
-#
-#       context "and attributes changed is empty with other method" do
-#         it "return true" do
-#           dealer.set_attributes_changed
-#           expect(dealer.no_need_to_synchronize?('post')).to eq(true)
-#         end
-#       end
-#     end
-#
-#     context "when must synch is true" do
-#       it "returns false" do
-#         dealer.synchronized = false
-#         dealer.set_attributes_changed
-#         expect(dealer.no_need_to_synchronize?('post')).to eq(false)
-#       end
-#     end
-#
-#   end
 
 
   # let(:dealer) { FactoryGirl.create(:dealer_synchronized) }

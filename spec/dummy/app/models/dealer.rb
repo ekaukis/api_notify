@@ -4,12 +4,14 @@ class Dealer < ActiveRecord::Base
 
   api_notify [
     :title
-    ],
-    {
-      other_system_id: :id
-    },
-    endpoints: [
-      :dealer
+  ],
+  {
+    other_system_id: :id
+  },
+  {
+    one: {
+      #skip_synchronize: :dont_do_synchronize
+    }
+  }
 
-    ]
 end

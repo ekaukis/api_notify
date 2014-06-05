@@ -14,24 +14,19 @@ class Vehicle < ActiveRecord::Base
   {
     id: :id
   },
-  skip_synchronize: :dont_do_synchronize,
-  endpoints: [
-    {
-      name: :one,
-      skip_syncronize: :dont_do_synchronize,
-      is_synchronized: :synchronized
+  {
+    one: {
+      skip_synchronize: :one_dont_do_synchronize,
     },
-    {
-      name: :other,
-      skip_syncronize: :dont_do_synchronize,
-      is_synchronized: :synchronized
+    other: {
+      skip_synchronize: :other_dont_do_synchronize,
     }
-  ]
+  },
+  route_name: "the_vehicles"
 
-  attr_accessor :dont_do_synchronize
+  attr_accessor :one_dont_do_synchronize, :other_dont_do_synchronize
 
   def api_notify_post_success response
-    self.other = response[:body]["other"]
-    self.save
+    update_columns(other: response[:body]["other"])
   end
 end

@@ -35,23 +35,23 @@
 
  * Add api_notify to models
 
-         api_notify [
-           :attribute_name,
-           'association.attribute_name'
-         ], # fields being checkd for changes
-         {
-           id: :id # Mandatrory fields
-         },
-         endpoints: [
-           {
-             name: one
-             skip_syncronize: :dont_do_synchronize,
-             is_synchronized: :synchronized
-           },
-           {
-             name: other
-           }
-         ] # endpoint config
+        api_notify [
+          :attribute_name,
+          'association.attribute_name'
+        ], # fields being checkd for changes
+        {
+          id: :id
+        }, # Identificators
+        {
+          one: {
+            skip_synchronize: :one_dont_do_synchronize,
+          },
+          other: {
+            skip_synchronize: :other_dont_do_synchronize,
+          }
+        }, # endpoint config
+        route_name: "the_route"
+
 
  * Define custom synchronization methods for each endpoint - skip_synchronize and is_synchronized
 

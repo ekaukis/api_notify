@@ -12,11 +12,11 @@ module ApiNotify
       METHODS = %w[post get delete put]
 
       module ClassMethods
-        def api_notify(fields, identificators, *args)
-          attr_accessor :skip_api_notify, :attributes_changed, :fields_changed
+        def api_notify(fields, identificators, endpoints, *args)
+          attr_accessor :skip_api_notify
 
-          set_callbacks
-          set_associations
+          assign_callbacks
+          assign_associations
 
           define_method :notify_attributes do
             fields
@@ -26,13 +26,21 @@ module ApiNotify
             identificators
           end
 
-          define_default_callback_methods
-          define_options_methods args.extract_options!
-          define_route_name_method
-          define_synchronizer_method identificators
+          define_method :endpoints do
+            endpoints
+          end
+
+          endpoints.each_pair do |endpoint, params|
+            define_default_request_callbacks endpoint
+            define_options params, endpoint
+          end
+          define_options args.extract_options!
+
+          define_route_name
+          define_synchronizer identificators
         end
 
-        def set_callbacks
+        def assign_callbacks
           after_update :post_via_api
           after_create :post_via_api
           after_destroy :delete_via_api
@@ -41,30 +49,34 @@ module ApiNotify
           before_destroy :delete_gather_changes
         end
 
-        def set_associations
-          has_one :api_notify_log, as: :api_notify_logable
-          has_many :api_notify_tasks, as: :api_notifiable
+        def assign_associations
+          has_many :api_notify_logs, as: :api_notify_logable, dependent: :destroy
+          has_many :api_notify_tasks, as: :api_notifiable, dependent: :destroy
         end
 
-        def define_default_callback_methods
+        # Defines default callback methods, like success and failed for each endpoint
+        def define_default_request_callbacks endpoint
           METHODS.each do |method|
-            define_method "api_notify_#{method}_success" do |response|
+            define_method "#{endpoint}_api_notify_#{method}_success" do |response|
             end
 
-            define_method "api_notify_#{method}_failed" do |response|
+            define_method "#{endpoint}_api_notify_#{method}_failed" do |response|
             end
           end
         end
 
-        def define_options_methods options
+        # If endpoint given, defined mehod will be assigned to endpoint
+        def define_options options, endpoint = false
           options.each_pair do |key, value|
-            define_singleton_method key do
+            method_name = endpoint ? "#{endpoint}_#{key}" : key
+            define_singleton_method method_name do
               value
-            end
+            end unless method_defined? method_name.to_sym
           end
         end
 
-        def define_route_name_method
+        # Route name will be used to create url for request
+        def define_route_name
           define_singleton_method :route_name do
             begin
               return api_route_name.downcase
@@ -75,14 +87,16 @@ module ApiNotify
           end
         end
 
-        def define_synchronizer_method identificators
+        def define_synchronizer identificators
           define_singleton_method :synchronizer do
             ApiNotify::ActiveRecord::Synchronizer.new route_name, identificators.keys.first
           end
         end
-
       end
 
+      ##
+      # Helper methods for activrecord instance
+      ##
       def disable_api_notify
         self.skip_api_notify = true
       end
@@ -101,34 +115,28 @@ module ApiNotify
         self.update_attributes attributes
       end
 
-      def must_sync
-        _must_sync = false
-        _must_sync = !send(self.class.is_synchronized) if defined? self.class.is_synchronized
-        _must_sync
+      ##
+      # If must_sync forces attribute to be synchronized
+      ##
+      def must_sync endpoint
+        api_notify_logs.find_by(endpoint: endpoint).nil?
       end
 
-      def fields_to_change
+      def fields_to_change endpoint
         notify_attributes.inject([]) do |_fields, field|
-          if field_changed?(field) || must_sync
+          if field_changed?(field) || must_sync(endpoint)
             _fields << field
           end
           _fields
         end
       end
 
-      def attributes_as_params
-        notify_attributes.inject({}) do |_fields, field|
-          if field_changed?(field) || must_sync
-            _fields[field] = get_value(field)
-          end
-          _fields
-        end
+      def fill_fields_with_values fields
+        fields.inject({}){ |_fields, field| _fields[field] = get_value(field);  _fields }
       end
 
       def get_identificators
-        _fields = {}
-        identificators.each_pair { |key, value| _fields[key] = get_value(value) }
-        _fields
+        identificators.inject({}){ |hash, (key, value)| hash[key] = get_value(value); hash}
       end
 
       def get_value(field)
@@ -145,17 +153,18 @@ module ApiNotify
         end
       end
 
-      def set_attributes_changed
-        @attributes_changed = attributes_as_params
+      def set_fields_changed
+        @fields_changed = endpoints.inject({}){|r, (endpoint, p)| r[endpoint] = fields_to_change(endpoint); r }
       end
 
-      def set_fields_changed
-        @fields_changed = fields_to_change
+      def fields_changed endpoint
+        @fields_changed.is_a?(Hash) ? @fields_changed[endpoint] : []
       end
+
 
       def create_task endpoint, method
         task = api_notify_tasks.create({
-          fields_updated: fields_changed,
+          fields_updated: fields_changed(endpoint),
           endpoint: endpoint,
           method: method
         })
@@ -163,14 +172,14 @@ module ApiNotify
         ApiNotify::Workers::SynchronizerWorker.perform_async(task.id)
       end
 
-      def no_need_to_synchronize?(method)
+      def no_need_to_synchronize?(method, endpoint)
         return true if skip_api_notify
 
-        if defined? self.class.skip_synchronize
-          return true if send(self.class.skip_synchronize)
+        if self.class.methods.include? "#{endpoint}_skip_synchronize".to_sym
+          return true if send self.class.send("#{endpoint}_skip_synchronize")
         end
 
-        if method != "delete" && attributes_changed.empty?
+        if method != "delete" && fields_changed(endpoint).empty?
           return true
         end
 
@@ -183,7 +192,9 @@ module ApiNotify
           return unless ApiNotify.configuration.active
           case vars.last
           when "via_api"
-            create_task "dealer", vars.first #unless no_need_to_synchronize?(vars.first)
+            endpoints.each_pair do |endpoint, params|
+              create_task endpoint, vars.first unless no_need_to_synchronize?(vars.first, endpoint)
+            end
           when "gather_changes"
             set_fields_changed
           end

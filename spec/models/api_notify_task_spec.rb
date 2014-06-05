@@ -7,8 +7,41 @@ describe ApiNotifyTask do
 
   describe "api_notifiable" do
 
-    let(:dealer) { FactoryGirl.create(:dealer_synchronized) }
-    let(:vehicle) { FactoryGirl.build(:vehicle, dealer: dealer) }
+    let(:dealer) do
+      stub_request(:post, "https://one.example.com/api/v1/dealers")
+      .to_return(
+        status: 201,
+        body: '{
+          "other_system_id": "New 10"
+        }',
+        headers: {}
+      ).times(1)
+
+      FactoryGirl.create(:dealer_synchronized)
+    end
+
+    let(:vehicle) do
+      stub_request(:post, "https://one.example.com/api/v1/vehicles")
+      .to_return(
+        status: 201,
+        body: '{
+          "other": "New info"
+        }',
+        headers: {}
+      ).times(1)
+
+      stub_request(:post, "http://other.example.com/api/v1/vehicles")
+      .to_return(
+        status: 201,
+        body: '{
+          "other": "New info"
+        }',
+        headers: {}
+      ).times(1)
+
+
+      FactoryGirl.build(:vehicle, dealer: dealer)
+    end
 
     let(:subject) do
       vehicle.save
@@ -21,11 +54,11 @@ describe ApiNotifyTask do
       end
 
       it "sets fields_updated" do
-        expect(subject.fields_updated).to eq([:no, :vin, :make, :dealer_id])
+        expect(subject.fields_updated).to eq([:no, :vin, :make, :dealer_id, "dealer.title", "vehicle_type.title"])
       end
 
       it "sets endpoint" do
-        expect(subject.endpoint).to eq("dealer")
+        expect(subject.endpoint).to eq("other")
       end
 
       it "sets api_notifiable" do
@@ -48,21 +81,42 @@ describe ApiNotifyTask do
         expect(subject.done).to be_truthy
       end
 
-      it "sends request to endpoint" do
-        # stub_request(:post, "https://example.com/api/v1/vehicles")
-        # .to_return(
-        #   status: 201,
-        #   body: '{
-        #     "other": "New info"
-        #   }',
-        #   headers: {}
-        # ).times(1)
-
-        expect(a_request(:post, "https://one.example.com/api/v1/vehicles")).to have_been_made
-        #expect(subject.done).to be_truthy
+      it "sets response" do
+        expect(subject.reload.response).to eq("{\"status\":\"201\",\"body\":{\"other\":\"New info\"}}")
       end
 
-      it "updates rubie_id to api_notifiable"
+      it "sends request to endpoint" do
+        body = "dealer.title=#{dealer.title}&" +
+               "dealer_id=#{dealer.id}&" +
+               "id=#{vehicle.id}&" +
+               "make=#{vehicle.make}&" +
+               "no=#{vehicle.no}&" +
+               "vehicle_type.title=#{vehicle.vehicle_type.title}&" +
+               "vin=#{vehicle.vin}"
+
+        expect(a_request(:post, "https://one.example.com/api/v1/vehicles").with { |req| req.body == body }).
+          to have_been_made
+
+        expect(a_request(:post, "http://other.example.com/api/v1/vehicles").with { |req| req.body == body }).
+          to have_been_made
+
+
+      end
+
+      # it "updates rubie_id to api_notifiable", pending: "Not yet implemented" #do
+      #   stub_request(:post, "https://one.example.com/api/v1/vehicles")
+      #   .to_return(
+      #     status: 201,
+      #     body: '{
+      #       "other": "New info"
+      #     }',
+      #     headers: {}
+      #   ).times(1)
+      #   end
+
+      it "creates api_notify_log records" do
+        expect(vehicle.api_notify_logs.size).to eq(2)
+      end
 
     end
 
