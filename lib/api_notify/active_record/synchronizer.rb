@@ -7,25 +7,25 @@ module ApiNotify
       def initialize route_name, id_param
         @_params = {}
         @route_name = route_name
-        @_success = false
         @id_param = id_param
       end
 
       def response
         begin
-          { status: @_response.code, body: JSON.parse(@_response.body)}
+          { status: @_response.code, body: JSON.parse(@_response.body) }
         rescue JSON::ParserError, NoMethodError => e
+
           case e.class.name
           when "NoMethodError"
-            { status: e.class.name, body: "#{e.message} | #{@_response[:error].message}" }
+            { status: e.class.name, body: "#{@_response[:error].message}" }
           when "JSON::ParserError"
-            { status: e.class.name, body: "#{e.message} | #{@_response.body}" }
+            { status: e.class.name, body: "#{e.message.truncate(1000, separator: "\n")}" }
           end
         end
       end
 
       def success?
-        @_success
+        %w(200 201 202 203 204).include?(response[:status].to_s)
       end
 
       def send_request(type = 'GET', url_param = false, endpoint)
@@ -37,9 +37,8 @@ module ApiNotify
             http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           end
           _url = url_param ? build_url(url_param) : url(type)
-          ApiNotify::LOGGER.info "Request #{@config["domain"]}:#{@config["port"]}#{_url}?#{params_query}"
+          LOGGER.info "Request #{@config["domain"]}:#{@config["port"]}#{_url}?#{params_query}"
           @_response = http.send_request(type, _url, params_query, headers)
-          @_success = true
         rescue Exception => e
           @_response = {error: e}
         end
@@ -76,15 +75,11 @@ module ApiNotify
       private
         def load_config_yaml endpoint
           config_yaml = ApiNotify.configuration.config_file
-          YAML.load_file(config_yaml)[Rails.env][endpoint] if File.exists?(config_yaml)
+          YAML.load_file(config_yaml)[Rails.env][endpoint.to_s] if File.exists?(config_yaml)
         end
 
         def log_response
-          if %w(500 501 502 503 504 505 506).include? response[:status]
-            ApiNotify::LOGGER.info "Response #{response[:status]}: #{ response[:body].truncate(1000, separator: "\n") if response[:body].present?}\n"
-          else
-            ApiNotify::LOGGER.info "Response #{response[:status]}: #{ response[:body] }\n"
-          end
+          LOGGER.info "Response #{response[:status]}: #{ response[:body] }\n"
         end
     end
   end

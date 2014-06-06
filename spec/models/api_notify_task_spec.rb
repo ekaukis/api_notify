@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ApiNotifyTask do
+describe ApiNotify::Task do
   describe "ActiveRecord associations" do
     it { expect(subject).to belong_to(:api_notifiable) }
   end
@@ -67,7 +67,7 @@ describe ApiNotifyTask do
 
       it "creates work for synchronization" do
         subject
-        expect(ApiNotify::Workers::SynchronizerWorker.jobs.last["args"]).to eq([subject.id])
+        expect(ApiNotify::SynchronizerWorker.jobs.last["args"]).to eq([subject.id])
       end
     end
 

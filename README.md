@@ -57,8 +57,8 @@
 
  * If nescessary add callbacks for succes or failing
 
-   * api_notify_#{method}_success
-   * api_notify_#{method}_failed
+   * #{endpoint}_api_notify_#{method}_success
+   * #{endpoint}_api_notify_#{method}_failed
 
    ** methods are - post, delete, get and put
 

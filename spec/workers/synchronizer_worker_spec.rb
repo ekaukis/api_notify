@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ApiNotify::Workers::SynchronizerWorker do
+describe ApiNotify::SynchronizerWorker do
 
   # let(:application) do
   #   stub_request(:post, "https://mogo-lv.cubesystems.lv/api/v1/dealermodule/applications").

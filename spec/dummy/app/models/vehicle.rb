@@ -24,9 +24,15 @@ class Vehicle < ActiveRecord::Base
   },
   route_name: "the_vehicles"
 
+  before_save :other_dont
+
   attr_accessor :one_dont_do_synchronize, :other_dont_do_synchronize
 
-  def api_notify_post_success response
+  def other_dont
+    self.other_dont_do_synchronize = true#unless dealer_id
+  end
+
+  def one_api_notify_post_success response
     update_columns(other: response[:body]["other"])
   end
 end

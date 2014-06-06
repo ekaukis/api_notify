@@ -50,8 +50,8 @@ module ApiNotify
         end
 
         def assign_associations
-          has_many :api_notify_logs, as: :api_notify_logable, dependent: :destroy
-          has_many :api_notify_tasks, as: :api_notifiable, dependent: :destroy
+          has_many :api_notify_logs, as: :api_notify_logable, dependent: :destroy, class_name: ApiNotify::Log
+          has_many :api_notify_tasks, as: :api_notifiable, dependent: :destroy, class_name: ApiNotify::Task
         end
 
         # Defines default callback methods, like success and failed for each endpoint
@@ -89,7 +89,7 @@ module ApiNotify
 
         def define_synchronizer identificators
           define_singleton_method :synchronizer do
-            ApiNotify::ActiveRecord::Synchronizer.new route_name, identificators.keys.first
+            ActiveRecord::Synchronizer.new route_name, identificators.keys.first
           end
         end
       end
@@ -118,13 +118,14 @@ module ApiNotify
       ##
       # If must_sync forces attribute to be synchronized
       ##
-      def must_sync endpoint
+      def must_sync? endpoint
         api_notify_logs.find_by(endpoint: endpoint).nil?
       end
 
       def fields_to_change endpoint
+        @must_sync = must_sync?(endpoint)
         notify_attributes.inject([]) do |_fields, field|
-          if field_changed?(field) || must_sync(endpoint)
+          if field_changed?(field) || @must_sync
             _fields << field
           end
           _fields
@@ -169,7 +170,7 @@ module ApiNotify
           method: method
         })
 
-        ApiNotify::Workers::SynchronizerWorker.perform_async(task.id)
+        SynchronizerWorker.perform_async(task.id)
       end
 
       def no_need_to_synchronize?(method, endpoint)
