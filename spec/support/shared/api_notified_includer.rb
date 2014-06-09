@@ -36,7 +36,7 @@ shared_examples "an Api Notified includer" do |opts={}|
       end
     end
 
-    context "when before_destroy triggered", pending: "You cannot call create unless the parent is saved" do
+    context "when before_destroy triggered" do
       it "receivs delete_gather_changes" do
         expect(subject).to receive(:delete_gather_changes)
         subject.destroy

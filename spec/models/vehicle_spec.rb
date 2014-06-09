@@ -191,6 +191,7 @@ describe Vehicle do
         stub_request(:post, "https://one.example.com/api/v1/vehicles"
           ).to_return( status: 201, body: '{ "dealer_id": "12" }', headers: {} )
 
+        vehicle.dealer.dont_do_synchronize = true
         vehicle.dealer.title = "Dealer title"
         vehicle.save
       end
@@ -199,14 +200,14 @@ describe Vehicle do
         expect(vehicle.dealer.title).to eq("Dealer title")
       end
 
-      it "sends request", pending: "Need to check full requested body" do
-        #expect(a_request(:any, "https://one.example.com/api/v1/vehicles")).to have_been_made.times(2)
+      it "sends request" do
+        expect(a_request(:any, "https://one.example.com/api/v1/vehicles")).to have_been_made.times(2)
       end
     end
 
     context "when vehicle_type changed" do
       before do
-        stub_request(:post, "https://example.com/api/v1/vehicles"
+        stub_request(:post, "https://one.example.com/api/v1/vehicles"
           ).to_return(
             status: 201,
             body: '{
@@ -223,13 +224,13 @@ describe Vehicle do
         expect(vehicle.vehicle_type.title).to eq("Vehicle title")
       end
 
-      it "sends request", pending: "Need to check full requested body" do
-        #expect(a_request(:any, "https://one.example.com/api/v1/vehicles")).to have_been_made.times(2)
+      it "sends request" do
+        expect(a_request(:any, "https://one.example.com/api/v1/vehicles")).to have_been_made.times(2)
       end
     end
 
-    it "destroys vehicle", pending: "Need to find out what to do with deleted polymoiphism" do
-      stub_request(:delete, "https://example.com/api/v1/vehicles/#{vehicle.id}"
+    it "destroys vehicle" do
+      stub_request(:delete, "https://one.example.com/api/v1/vehicles/#{vehicle.id}"
         ).to_return(
           status: 204,
           body: '{
@@ -238,6 +239,12 @@ describe Vehicle do
           headers: {}
         )
       vehicle.destroy
+    end
+  end
+
+  context "#endpoint_api_notify_method_failed" do
+    it "" do
+
     end
   end
 

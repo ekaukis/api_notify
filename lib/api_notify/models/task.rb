@@ -4,31 +4,31 @@ module ApiNotify
 
     belongs_to :api_notifiable, polymorphic: true
 
-    serialize :fields_updated
+    serialize :fields_updated, Array
+    serialize :identificators, Hash
 
     def synchronize
-      synchronizer = api_notifiable.class.synchronizer
-      synchronizer.set_params(attributes_changed.merge(api_notifiable.get_identificators))
+      synchronizer = api_notifiable_type.constantize.synchronizer
+      synchronizer.set_params(attributes)
       synchronizer.send_request(method.upcase, false, endpoint)
 
+      send_callback(synchronizer) unless method == "delete"
+      update_attributes(done: synchronizer.success?, response: synchronizer.response.to_json)
+    end
+
+    def send_callback synchronizer
       api_notifiable.disable_api_notify
       if synchronizer.success?
         api_notifiable.send("#{endpoint}_api_notify_#{method}_success", synchronizer.response)
+        update_api_notify_log
       else
         api_notifiable.send("#{endpoint}_api_notify_#{method}_failed", synchronizer.response)
       end
       api_notifiable.enable_api_notify
-
-      if synchronizer.success?
-        update_attributes(done: true, response: synchronizer.response.to_json)
-        update_api_notify_log
-      else
-        raise synchronizer.response["body"]
-      end
     end
 
-    def attributes_changed
-      api_notifiable.fill_fields_with_values fields_updated
+    def attributes
+      (identificators.merge(api_notifiable.fill_fields_with_values(fields_updated)) if api_notifiable) || identificators
     end
 
     def update_api_notify_log

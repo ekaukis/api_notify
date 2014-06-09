@@ -51,7 +51,7 @@ module ApiNotify
 
         def assign_associations
           has_many :api_notify_logs, as: :api_notify_logable, dependent: :destroy, class_name: ApiNotify::Log
-          has_many :api_notify_tasks, as: :api_notifiable, dependent: :destroy, class_name: ApiNotify::Task
+          has_many :api_notify_tasks, as: :api_notifiable, class_name: ApiNotify::Task
         end
 
         # Defines default callback methods, like success and failed for each endpoint
@@ -164,8 +164,10 @@ module ApiNotify
 
 
       def create_task endpoint, method
-        task = api_notify_tasks.create({
+        task = Task.create({
+          api_notifiable: self,
           fields_updated: fields_changed(endpoint),
+          identificators: get_identificators,
           endpoint: endpoint,
           method: method
         })

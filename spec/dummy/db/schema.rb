@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(version: 20140602120014) do
 
   create_table "api_notify_tasks", force: true do |t|
     t.text     "fields_updated"
+    t.text     "identificators"
     t.integer  "api_notifiable_id"
     t.string   "api_notifiable_type"
     t.string   "endpoint"

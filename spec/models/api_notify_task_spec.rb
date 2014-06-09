@@ -57,8 +57,12 @@ describe ApiNotify::Task do
         expect(subject.fields_updated).to eq([:no, :vin, :make, :dealer_id, "dealer.title", "vehicle_type.title"])
       end
 
+      it "sets identificators" do
+        expect(subject.identificators).to eq({id: vehicle.id})
+      end
+
       it "sets endpoint" do
-        expect(subject.endpoint).to eq("other")
+        expect(subject.endpoint).to eq("one")
       end
 
       it "sets api_notifiable" do
@@ -96,30 +100,23 @@ describe ApiNotify::Task do
 
         expect(a_request(:post, "https://one.example.com/api/v1/vehicles").with { |req| req.body == body }).
           to have_been_made
-
-        expect(a_request(:post, "http://other.example.com/api/v1/vehicles").with { |req| req.body == body }).
-          to have_been_made
-
-
       end
 
-      # it "updates rubie_id to api_notifiable", pending: "Not yet implemented" #do
-      #   stub_request(:post, "https://one.example.com/api/v1/vehicles")
-      #   .to_return(
-      #     status: 201,
-      #     body: '{
-      #       "other": "New info"
-      #     }',
-      #     headers: {}
-      #   ).times(1)
-      #   end
-
       it "creates api_notify_log records" do
-        expect(vehicle.api_notify_logs.size).to eq(2)
+        expect(vehicle.api_notify_logs.size).to eq(1)
       end
 
     end
 
+  end
+
+  describe ".synchronize" do
+    before {Sidekiq::Testing.inline!}
+    context "when error received" do
+      it "raise error" do
+        expect{FactoryGirl.create(:dealer)}.to raise_error(ApiNotify::SynchronizerWorker::FailedSynchronization)
+      end
+    end
   end
 
 end

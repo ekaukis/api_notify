@@ -2,6 +2,7 @@ class CreateApiNotifyTasks < ActiveRecord::Migration
   def change
     create_table :api_notify_tasks do |t|
       t.text :fields_updated
+      t.text :identificators
       t.references :api_notifiable, polymorphic: true
       t.string :endpoint
       t.string :method
