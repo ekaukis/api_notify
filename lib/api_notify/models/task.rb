@@ -7,7 +7,7 @@ module ApiNotify
     serialize :fields_updated, Array
     serialize :identificators, Hash
 
-    after_commit :perform_task, :on => :create
+    after_commit :perform_task, on: :create
 
     def synchronize
       synchronizer = api_notifiable_type.constantize.synchronizer

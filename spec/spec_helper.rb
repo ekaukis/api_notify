@@ -13,6 +13,7 @@ require 'shoulda/matchers'
 require 'webmock/rspec'
 require 'factory_girl_rails'
 require 'fakeredis'
+require 'test_after_commit'
 
 Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
 

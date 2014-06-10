@@ -111,10 +111,10 @@ describe ApiNotify::Task do
   end
 
   describe ".synchronize" do
-    before {Sidekiq::Testing.inline!}
     context "when error received" do
       it "raise error" do
-        expect{FactoryGirl.create(:dealer)}.to raise_error(ApiNotify::SynchronizerWorker::FailedSynchronization)
+        dealer = FactoryGirl.create(:dealer)
+        expect{ApiNotify::SynchronizerWorker.drain}.to raise_error(ApiNotify::SynchronizerWorker::FailedSynchronization)
       end
     end
   end
