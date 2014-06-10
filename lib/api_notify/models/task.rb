@@ -7,6 +7,8 @@ module ApiNotify
     serialize :fields_updated, Array
     serialize :identificators, Hash
 
+    after_create :perform_task
+
     def synchronize
       synchronizer = api_notifiable_type.constantize.synchronizer
       synchronizer.set_params(attributes)
@@ -34,6 +36,10 @@ module ApiNotify
     def update_api_notify_log
       log = api_notifiable.api_notify_logs.find_or_initialize_by(endpoint: endpoint)
       log.new_record? ? log.save : log.touch
+    end
+
+    def perform_task
+      SynchronizerWorker.perform_async(id)
     end
   end
 end

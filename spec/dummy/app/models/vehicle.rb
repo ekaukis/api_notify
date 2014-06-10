@@ -22,7 +22,7 @@ class Vehicle < ActiveRecord::Base
       skip_synchronize: :other_dont_do_synchronize,
     }
   },
-  route_name: "the_vehicles"
+  api_route_name: "vehicles"
 
   before_save :other_dont
 

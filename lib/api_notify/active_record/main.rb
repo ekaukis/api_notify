@@ -171,8 +171,6 @@ module ApiNotify
           endpoint: endpoint,
           method: method
         })
-
-        SynchronizerWorker.perform_async(task.id)
       end
 
       def no_need_to_synchronize?(method, endpoint)
