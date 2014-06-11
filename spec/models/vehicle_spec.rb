@@ -118,16 +118,34 @@ describe Vehicle do
 
   describe ".save_without_api_notify" do
     it "saves without triggering api" do
+      Sidekiq::Testing.inline!
       vehicle.make = "VOLVO"
+      Sidekiq::Testing.fake!
       vehicle.save_without_api_notify
       expect(vehicle.make).to eq("VOLVO")
+      expect(ApiNotify::SynchronizerWorker.jobs.size).to eq(0)
     end
   end
 
   describe ".update_attributes_without_api_notify" do
     it "updates attributes without triggering api" do
+      Sidekiq::Testing.inline!
+      vehicle
+      Sidekiq::Testing.fake!
       vehicle.update_attributes_without_api_notify make: "VOLVO"
       expect(vehicle.make).to eq("VOLVO")
+      expect(ApiNotify::SynchronizerWorker.jobs.size).to eq(0)
+    end
+  end
+
+  describe ".destroy_without_api_notify" do
+    it "destroys triggering api" do
+      Sidekiq::Testing.inline!
+      vehicle
+      Sidekiq::Testing.fake!
+
+      expect{vehicle.destroy_without_api_notify}.to change{Vehicle.all.size}.from(1).to(0)
+      expect(ApiNotify::SynchronizerWorker.jobs.size).to eq(0)
     end
   end
 

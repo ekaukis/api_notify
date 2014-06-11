@@ -115,6 +115,11 @@ module ApiNotify
         self.update_attributes attributes
       end
 
+      def destroy_without_api_notify *args
+        self.disable_api_notify if defined? self.skip_api_notify
+        self.destroy *args
+      end
+
       def api_notified? endpoint
         api_notify_logs.find_by(endpoint: endpoint).present?
       end
