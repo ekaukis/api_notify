@@ -242,10 +242,4 @@ describe Vehicle do
     end
   end
 
-  context "#endpoint_api_notify_method_failed" do
-    it "" do
-
-    end
-  end
-
 end

@@ -115,15 +115,15 @@ module ApiNotify
         self.update_attributes attributes
       end
 
-      ##
-      # If must_sync forces attribute to be synchronized
-      ##
-      def must_sync? endpoint
-        api_notify_logs.find_by(endpoint: endpoint).nil?
+      def api_notified? endpoint
+        api_notify_logs.find_by(endpoint: endpoint).present?
       end
 
+      ##
+      # If @must_sync == true then forces all attributes to be synchronized
+      ##
       def fields_to_change endpoint
-        @must_sync = must_sync?(endpoint)
+        @must_sync = !api_notified?(endpoint)
         notify_attributes.inject([]) do |_fields, field|
           if field_changed?(field) || @must_sync
             _fields << field
