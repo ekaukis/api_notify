@@ -286,4 +286,14 @@ describe Vehicle do
 
   end
 
+  describe ".remove_api_notified" do
+    before do
+      Sidekiq::Testing.inline!
+    end
+
+    it "makes record unsinhronized from api_notify" do
+      expect{vehicle.remove_api_notified(:one)}.to change{vehicle.api_notified?(:one)}.from(true).to(false)
+    end
+  end
+
 end

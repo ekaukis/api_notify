@@ -128,6 +128,11 @@ module ApiNotify
         api_notify_logs.find_or_initialize_by(endpoint: endpoint).save
       end
 
+      def remove_api_notified endpoint
+        chain = api_notify_logs.find_by(endpoint: endpoint)
+        chain.destroy
+      end
+
       ##
       # If @must_sync == true then forces all attributes to be synchronized
       ##
