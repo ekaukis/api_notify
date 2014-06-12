@@ -178,6 +178,11 @@ module ApiNotify
         })
       end
 
+      def make_api_notify_call
+        post_gather_changes
+        post_via_api
+      end
+
       def no_need_to_synchronize?(method, endpoint)
         return true if skip_api_notify
 

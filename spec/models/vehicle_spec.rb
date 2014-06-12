@@ -260,4 +260,30 @@ describe Vehicle do
     end
   end
 
+  describe ".make_api_notify_call" do
+    before do
+      Sidekiq::Testing.inline!
+    end
+
+    context "when new record" do
+      it "makes request" do
+        stub_request(:post, "https://one.example.com/api/v1/vehicles").
+          to_return( status: 400, body: '{ "other": "New info" }', headers: {} ).then.
+          to_return( status: 201, body: '{ "other": "New info" }', headers: {} ).then
+
+        vehicle = FactoryGirl.create(:vehicle, dealer: dealer)
+        vehicle.make_api_notify_call
+        expect(a_request(:any, "https://one.example.com/api/v1/vehicles")).to have_been_made.times(2)
+      end
+    end
+
+    context "when existing record" do
+      it "makes request" do
+        vehicle.make_api_notify_call
+        expect(a_request(:any, "https://one.example.com/api/v1/vehicles")).to have_been_made.times(1)
+      end
+    end
+
+  end
+
 end
