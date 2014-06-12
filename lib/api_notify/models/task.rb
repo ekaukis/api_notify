@@ -22,7 +22,7 @@ module ApiNotify
       api_notifiable.disable_api_notify
       if synchronizer.success?
         api_notifiable.send("#{endpoint}_api_notify_#{method}_success", synchronizer.response)
-        update_api_notify_log
+        api_notifiable.make_api_notified endpoint
       else
         api_notifiable.send("#{endpoint}_api_notify_#{method}_failed", synchronizer.response)
       end
@@ -31,11 +31,6 @@ module ApiNotify
 
     def attributes
       (identificators.merge(api_notifiable.fill_fields_with_values(fields_updated)) if api_notifiable) || identificators
-    end
-
-    def update_api_notify_log
-      log = api_notifiable.api_notify_logs.find_or_initialize_by(endpoint: endpoint)
-      log.new_record? ? log.save : log.touch
     end
 
     def perform_task

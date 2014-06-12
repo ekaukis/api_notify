@@ -124,6 +124,10 @@ module ApiNotify
         api_notify_logs.find_by(endpoint: endpoint).present?
       end
 
+      def make_api_notified endpoint
+        api_notify_logs.find_or_initialize_by(endpoint: endpoint).save
+      end
+
       ##
       # If @must_sync == true then forces all attributes to be synchronized
       ##
