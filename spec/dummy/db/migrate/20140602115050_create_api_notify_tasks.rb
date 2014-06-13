@@ -7,6 +7,7 @@ class CreateApiNotifyTasks < ActiveRecord::Migration
       t.string :endpoint
       t.string :method
       t.text :response
+      t.integer :depending_id
       t.boolean :done, default: false
 
       t.timestamps

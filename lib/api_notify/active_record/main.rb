@@ -17,6 +17,7 @@ module ApiNotify
 
           assign_callbacks
           assign_associations
+          assign_scopes
 
           define_method :notify_attributes do
             fields
@@ -38,6 +39,10 @@ module ApiNotify
 
           define_route_name
           define_synchronizer identificators
+        end
+
+        def assign_scopes
+          scope :unsynchronized, -> endpoint { joins("LEFT JOIN `api_notify_logs` ON api_notify_logs.api_notify_logable_id = #{self.table_name}.id AND api_notify_logable_type = '#{self.name}' AND api_notify_logs.endpoint='#{endpoint}'").where("api_notify_logs.api_notify_logable_id IS NULL")}
         end
 
         def assign_callbacks
@@ -133,6 +138,13 @@ module ApiNotify
         chain.destroy
       end
 
+      def notify_children endpoint
+        if self.class.methods.include?(:children)
+          self.class.children.each do |child_class|
+            child_class.unsynchronized(endpoint).each { |resource| resource.make_api_notify_call(endpoint) }
+          end
+        end
+      end
       ##
       # If @must_sync == true then forces all attributes to be synchronized
       ##
@@ -154,6 +166,11 @@ module ApiNotify
         identificators.inject({}){ |hash, (key, value)| hash[key] = get_value(value); hash}
       end
 
+      def all_indentificators?
+        get_identificators.each_pair { |key, value| return false unless value.present? }
+        return true
+      end
+
       def get_value(field)
         "#{field.to_s}".split('.').inject(self) { |obj, method| obj.present? ? obj.send(method) : "" }
       end
@@ -172,12 +189,14 @@ module ApiNotify
         @fields_changed = endpoints.inject({}){|r, (endpoint, p)| r[endpoint] = fields_to_change(endpoint); r }
       end
 
-      def fields_changed endpoint
-        @fields_changed.is_a?(Hash) ? @fields_changed[endpoint] : []
+      def fields_changed(endpoint)
+        @fields_changed.is_a?(Hash) ? @fields_changed[endpoint.to_sym] : []
       end
 
+      # Create task only if all identificators given, else task will be created after parent object creates it
+      def create_task(endpoint, method)
+        return if no_need_to_synchronize?(method, endpoint) || !all_indentificators?
 
-      def create_task endpoint, method
         task = Task.create({
           api_notifiable: self,
           fields_updated: fields_changed(endpoint),
@@ -187,9 +206,9 @@ module ApiNotify
         })
       end
 
-      def make_api_notify_call
+      def make_api_notify_call(endpoint)
         post_gather_changes
-        post_via_api
+        create_task endpoint, "post"
       end
 
       def no_need_to_synchronize?(method, endpoint)
@@ -213,7 +232,7 @@ module ApiNotify
           case vars.last
           when "via_api"
             endpoints.each_pair do |endpoint, params|
-              create_task endpoint, vars.first unless no_need_to_synchronize?(vars.first, endpoint)
+              create_task endpoint, vars.first
             end
           when "gather_changes"
             set_fields_changed

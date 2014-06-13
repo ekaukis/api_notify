@@ -272,14 +272,14 @@ describe Vehicle do
           to_return( status: 201, body: '{ "other": "New info" }', headers: {} ).then
 
         vehicle = FactoryGirl.create(:vehicle, dealer: dealer)
-        vehicle.make_api_notify_call
+        vehicle.make_api_notify_call(:one)
         expect(a_request(:any, "https://one.example.com/api/v1/vehicles")).to have_been_made.times(2)
       end
     end
 
     context "when existing record" do
       it "makes request" do
-        vehicle.make_api_notify_call
+        vehicle.make_api_notify_call(:one)
         expect(a_request(:any, "https://one.example.com/api/v1/vehicles")).to have_been_made.times(1)
       end
     end
@@ -293,6 +293,30 @@ describe Vehicle do
 
     it "makes record unsinhronized from api_notify" do
       expect{vehicle.remove_api_notified(:one)}.to change{vehicle.api_notified?(:one)}.from(true).to(false)
+    end
+  end
+
+
+  describe ".unsinhronized" do
+    before do
+      Sidekiq::Testing.inline!
+      stub_request(:post, "https://one.example.com/api/v1/vehicles").
+        to_return( status: 400, body: '{ "other": "New info" }', headers: {} ).then.
+        to_return( status: 201, body: '{ "other": "New info" }', headers: {} ).then
+
+      FactoryGirl.create(:vehicle, dealer: dealer)
+      FactoryGirl.create(:vehicle, dealer: dealer)
+      FactoryGirl.create(:vehicle, dealer: dealer)
+    end
+
+    context "when one item responds with 400 status and two with 201" do
+      it "has three records" do
+        expect(Vehicle.all.size).to eq(3)
+      end
+
+      it "has one unsinhronized records" do
+        expect(Vehicle.unsynchronized(:one).size).to eq(1)
+      end
     end
   end
 

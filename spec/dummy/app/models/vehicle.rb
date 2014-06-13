@@ -12,7 +12,8 @@ class Vehicle < ActiveRecord::Base
     'vehicle_type.title'
   ],
   {
-    id: :id
+    id: :id,
+    one_dealer_id: "dealer.other_system_id"
   },
   {
     one: {

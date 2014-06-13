@@ -58,7 +58,7 @@ describe ApiNotify::Task do
       end
 
       it "sets identificators" do
-        expect(subject.identificators).to eq({id: vehicle.id})
+        expect(subject.identificators).to eq({id: vehicle.id, one_dealer_id: dealer.other_system_id})
       end
 
       it "sets endpoint" do
@@ -95,6 +95,7 @@ describe ApiNotify::Task do
                "id=#{vehicle.id}&" +
                "make=#{vehicle.make}&" +
                "no=#{vehicle.no}&" +
+               "one_dealer_id=#{dealer.other_system_id}&" +
                "vehicle_type.title=#{vehicle.vehicle_type.title}&" +
                "vin=#{vehicle.vin}"
 

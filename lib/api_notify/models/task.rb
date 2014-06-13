@@ -7,7 +7,7 @@ module ApiNotify
     serialize :fields_updated, Array
     serialize :identificators, Hash
 
-    after_commit :perform_task, on: :create
+    after_commit :setup_task, on: :create
 
     def synchronize
       synchronizer = api_notifiable_type.constantize.synchronizer
@@ -23,6 +23,7 @@ module ApiNotify
       if synchronizer.success?
         api_notifiable.send("#{endpoint}_api_notify_#{method}_success", synchronizer.response)
         api_notifiable.make_api_notified endpoint
+        api_notifiable.notify_children endpoint
       else
         api_notifiable.send("#{endpoint}_api_notify_#{method}_failed", synchronizer.response)
       end
@@ -33,7 +34,7 @@ module ApiNotify
       (identificators.merge(api_notifiable.fill_fields_with_values(fields_updated)) if api_notifiable) || identificators
     end
 
-    def perform_task
+    def setup_task
       SynchronizerWorker.perform_async(id)
     end
   end
