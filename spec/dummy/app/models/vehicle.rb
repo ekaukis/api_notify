@@ -23,7 +23,8 @@ class Vehicle < ActiveRecord::Base
       skip_synchronize: :other_dont_do_synchronize,
     }
   },
-  api_route_name: "vehicles"
+  api_route_name: "vehicles",
+  parent_attribute: :one_dealer_id
 
   before_save :other_dont
 

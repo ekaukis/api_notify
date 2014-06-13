@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    api_notify (0.8.8)
+    api_notify (0.8.9)
       rails (~> 4.0.5)
       sidekiq (~> 2.17.0)
       sidekiq-cron (~> 0.1.0)

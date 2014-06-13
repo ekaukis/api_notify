@@ -167,8 +167,8 @@ module ApiNotify
       end
 
       def all_indentificators?
-        get_identificators.each_pair { |key, value| return false unless value.present? }
-        return true
+        return true unless self.class.methods.include?(:parent_attribute)
+        return get_identificators[self.class.parent_attribute].present?
       end
 
       def get_value(field)
