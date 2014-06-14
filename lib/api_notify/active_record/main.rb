@@ -141,7 +141,9 @@ module ApiNotify
       def notify_children endpoint
         if self.class.methods.include?(:children)
           self.class.children.each do |child_class|
-            child_class.unsynchronized(endpoint).each { |resource| resource.make_api_notify_call(endpoint) }
+            self.send(child_class).unsynchronized(endpoint).each do |resource|
+              resource.make_api_notify_call(endpoint)
+            end
           end
         end
       end

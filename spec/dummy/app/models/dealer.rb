@@ -13,7 +13,7 @@ class Dealer < ActiveRecord::Base
       skip_synchronize: :dont_do_synchronize
     }
   },
-  children: [Vehicle]
+  children: %w(vehicles)
 
   attr_accessor :dont_do_synchronize
 
