@@ -143,6 +143,7 @@ module ApiNotify
           self.class.children.each do |child_class|
             self.send(child_class).unsynchronized(endpoint).each do |resource|
               resource.make_api_notify_call(endpoint)
+              LOGGER.info "NOTIFY CHILD: Parent: #{self.class.name}-#{self.id} Child: #{resource.class.name}-#{resource.id}"
             end
           end
         end
