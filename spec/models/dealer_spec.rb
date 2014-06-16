@@ -21,6 +21,8 @@ describe Dealer do
       ApiNotify::SynchronizerWorker.drain
       vehicle.remove_api_notified(:one)
 
+      expect(vehicle.api_notified?(:one)).to be_falsey
+
       dealer = FactoryGirl.build(:dealer)
       dealer.vehicles.build FactoryGirl.attributes_for(:vehicle)
       dealer.save

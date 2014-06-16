@@ -21,8 +21,8 @@ module ApiNotify
     def send_callback synchronizer
       api_notifiable.disable_api_notify
       if synchronizer.success?
-        api_notifiable.send("#{endpoint}_api_notify_#{method}_success", synchronizer.response)
         api_notifiable.make_api_notified endpoint
+        api_notifiable.send("#{endpoint}_api_notify_#{method}_success", synchronizer.response)
         api_notifiable.notify_children endpoint
       else
         api_notifiable.send("#{endpoint}_api_notify_#{method}_failed", synchronizer.response)
