@@ -31,6 +31,21 @@ module ApiNotify
       @config_file = "#{Rails.root.to_s}/config/api_notify.yml"
     end
 
+    def config endpoint
+      config_hash[endpoint.to_s]
+    end
+
+    def config_hash
+      @_config_hash ||= YAML.load_file(@config_file)[Rails.env] if File.exists?(@config_file)
+    end
+
+    def endpoints
+      config_hash.inject([]){|res, (k,v)| res << k; res}
+    end
+
+    def endpoint_active? endpoint
+      endpoints.include?(endpoint.to_s)
+    end
   end
 
 end

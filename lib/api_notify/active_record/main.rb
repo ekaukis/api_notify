@@ -200,6 +200,7 @@ module ApiNotify
       def create_task(endpoint, method)
         return if no_need_to_synchronize?(method, endpoint) || !all_indentificators?
 
+        LOGGER.info "BEGIN TASK CREATING"
         task = Task.create({
           api_notifiable: self,
           fields_updated: fields_changed(endpoint),
@@ -215,6 +216,7 @@ module ApiNotify
       end
 
       def no_need_to_synchronize?(method, endpoint)
+        return true unless ApiNotify.configuration.endpoint_active?(endpoint)
         return true if skip_api_notify
 
         if self.class.methods.include? "#{endpoint}_skip_synchronize".to_sym

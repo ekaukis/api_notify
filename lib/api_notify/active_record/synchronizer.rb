@@ -29,7 +29,7 @@ module ApiNotify
       end
 
       def send_request(type = 'GET', url_param = false, endpoint)
-        @config = load_config_yaml(endpoint)
+        @config = ApiNotify.configuration.config(endpoint)
         begin
           http = Net::HTTP.new(@config["domain"], @config["port"])
           if @config["port"].to_i == 443
@@ -73,11 +73,6 @@ module ApiNotify
       end
 
       private
-        def load_config_yaml endpoint
-          config_yaml = ApiNotify.configuration.config_file
-          YAML.load_file(config_yaml)[Rails.env][endpoint.to_s] if File.exists?(config_yaml)
-        end
-
         def log_response
           LOGGER.info "Response #{response[:status]}: #{ response[:body] }\n"
         end
