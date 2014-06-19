@@ -216,6 +216,7 @@ module ApiNotify
       end
 
       def no_need_to_synchronize?(method, endpoint)
+        return true unless ApiNotify.configuration.config_defined?
         return true unless ApiNotify.configuration.endpoint_active?(endpoint)
         return true if skip_api_notify
 

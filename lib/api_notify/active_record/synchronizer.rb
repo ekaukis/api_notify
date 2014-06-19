@@ -29,18 +29,22 @@ module ApiNotify
       end
 
       def send_request(type = 'GET', url_param = false, endpoint)
-        @config = ApiNotify.configuration.config(endpoint)
-        begin
-          http = Net::HTTP.new(@config["domain"], @config["port"])
-          if @config["port"].to_i == 443
-            http.use_ssl = true
-            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        if ApiNotify.configuration.config_defined?
+          @config = ApiNotify.configuration.config(endpoint)
+          begin
+            http = Net::HTTP.new(@config["domain"], @config["port"])
+            if @config["port"].to_i == 443
+              http.use_ssl = true
+              http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+            end
+            _url = url_param ? build_url(url_param) : url(type)
+            LOGGER.info "Request #{@config["domain"]}:#{@config["port"]}#{_url}?#{params_query}"
+            @_response = http.send_request(type, _url, params_query, headers)
+          rescue Exception => e
+            @_response = {error: e}
           end
-          _url = url_param ? build_url(url_param) : url(type)
-          LOGGER.info "Request #{@config["domain"]}:#{@config["port"]}#{_url}?#{params_query}"
-          @_response = http.send_request(type, _url, params_query, headers)
-        rescue Exception => e
-          @_response = {error: e}
+        else
+          @_response = {error: StandartError.new("Missing configuration")}
         end
         log_response
         @_response

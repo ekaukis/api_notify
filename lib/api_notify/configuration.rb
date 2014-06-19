@@ -27,8 +27,8 @@ module ApiNotify
 
     # Configuration parameters
     def initialize
-      @active = true
       @config_file = "#{Rails.root.to_s}/config/api_notify.yml"
+      @active = true
     end
 
     def config endpoint
@@ -36,7 +36,15 @@ module ApiNotify
     end
 
     def config_hash
-      @_config_hash ||= YAML.load_file(@config_file)[Rails.env] if File.exists?(@config_file)
+       @_config_hash ||= YAML.load_file(@config_file)[Rails.env] if File.exists?(@config_file)
+    end
+
+    def config_defined?
+      return false unless File.exists?(@config_file)
+      config = YAML.load_file(@config_file)
+
+      return false unless config
+      return config.has_key?(Rails.env)
     end
 
     def endpoints
