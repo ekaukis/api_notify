@@ -1,5 +1,8 @@
 module ApiNotify
   class Task < ActiveRecord::Base
+
+
+
     self.table_name = :api_notify_tasks
 
     belongs_to :api_notifiable, polymorphic: true
@@ -12,10 +15,13 @@ module ApiNotify
     def synchronize
       synchronizer = api_notifiable_type.constantize.synchronizer
       synchronizer.set_params(attributes)
-      synchronizer.send_request(method.upcase, false, endpoint)
+      begin
+        synchronizer.send_request(method.upcase, false, endpoint)
+        send_callback(synchronizer) unless method == "delete"
+        update_attributes(done: synchronizer.success?, response: synchronizer.response.to_json)
+      rescue ApiNotify::ActiveRecord::Synchronizer::FailedSynchronization => e
 
-      send_callback(synchronizer) unless method == "delete"
-      update_attributes(done: synchronizer.success?, response: synchronizer.response.to_json)
+      end
     end
 
     def send_callback synchronizer
