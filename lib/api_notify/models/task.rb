@@ -20,7 +20,7 @@ module ApiNotify
         send_callback(synchronizer) unless method == "delete"
         update_attributes(done: synchronizer.success?, response: synchronizer.response.to_json)
       rescue ApiNotify::ActiveRecord::Synchronizer::FailedSynchronization => e
-
+        LOGGER.info "Exception raised: #{e.message}"
       end
     end
 
