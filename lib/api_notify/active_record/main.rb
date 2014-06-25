@@ -139,8 +139,8 @@ module ApiNotify
       end
 
       def notify_children endpoint
-        if self.class.methods.include?(:children)
-          self.class.children.each do |child_class|
+        if self.class.methods.include?("#{endpoint}_children".to_sym)
+          self.class.send("#{endpoint}_children").each do |child_class|
             self.send(child_class).unsynchronized(endpoint).each do |resource|
               resource.make_api_notify_call(endpoint)
               LOGGER.info "NOTIFY CHILD: Parent: #{self.class.name}-#{self.id} Child: #{resource.class.name}-#{resource.id}"
@@ -165,13 +165,19 @@ module ApiNotify
         fields.inject({}){ |_fields, field| _fields[field] = get_value(field);  _fields }
       end
 
-      def get_identificators
-        identificators.inject({}){ |hash, (key, value)| hash[key] = get_value(value); hash}
+      def get_identificators(endpoint)
+        if self.class.methods.include?("#{endpoint}_identificators".to_sym)
+          additional = self.class.send("#{endpoint}_identificators")
+        else
+          additional = {}
+        end
+
+        identificators.merge(additional).inject({}){ |hash, (key, value)| hash[key] = get_value(value); hash}
       end
 
-      def all_indentificators?
-        return true unless self.class.methods.include?(:parent_attribute)
-        return get_identificators[self.class.parent_attribute].present?
+      def all_indentificators?(endpoint)
+        return true unless self.class.methods.include?("#{endpoint}_parent_attribute".to_sym)
+        return get_identificators(endpoint)[self.class.send("#{endpoint}_parent_attribute")].present?
       end
 
       def get_value(field)
@@ -198,13 +204,13 @@ module ApiNotify
 
       # Create task only if all identificators given, else task will be created after parent object creates it
       def create_task(endpoint, method)
-        return if no_need_to_synchronize?(method, endpoint) || !all_indentificators?
+        return if no_need_to_synchronize?(method, endpoint) || !all_indentificators?(endpoint)
 
         LOGGER.info "BEGIN TASK CREATING"
         task = Task.create({
           api_notifiable: self,
           fields_updated: fields_changed(endpoint),
-          identificators: get_identificators,
+          identificators: get_identificators(endpoint),
           endpoint: endpoint,
           method: method
         })

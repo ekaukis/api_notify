@@ -12,19 +12,22 @@ class Vehicle < ActiveRecord::Base
     'vehicle_type.title'
   ],
   {
-    id: :id,
-    one_dealer_id: "dealer.other_system_id"
+    id: :id
   },
   {
     one: {
+      identificators: {
+        one_dealer_id: "dealer.other_system_id"
+      },
       skip_synchronize: :one_dont_do_synchronize,
+      parent_attribute: :one_dealer_id,
     },
     other: {
       skip_synchronize: :other_dont_do_synchronize,
     }
   },
-  api_route_name: "vehicles",
-  parent_attribute: :one_dealer_id
+  api_route_name: "vehicles"
+
 
   before_save :other_dont
 
