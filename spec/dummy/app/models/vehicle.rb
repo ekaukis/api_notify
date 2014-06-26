@@ -21,6 +21,7 @@ class Vehicle < ActiveRecord::Base
       },
       skip_synchronize: :one_dont_do_synchronize,
       parent_attribute: :one_dealer_id,
+      scope: :one_unsynchronized_scope
     },
     other: {
       skip_synchronize: :other_dont_do_synchronize,
@@ -40,4 +41,11 @@ class Vehicle < ActiveRecord::Base
   def one_api_notify_post_success response
     update_columns(other: response[:body]["other"])
   end
+
+  class << self
+    def one_unsynchronized_scope
+      where("vehicles.dealer_id > 0")
+    end
+  end
+
 end

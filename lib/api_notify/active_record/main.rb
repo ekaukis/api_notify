@@ -17,7 +17,6 @@ module ApiNotify
 
           assign_callbacks
           assign_associations
-          assign_scopes
 
           define_method :notify_attributes do
             fields
@@ -39,10 +38,16 @@ module ApiNotify
 
           define_route_name
           define_synchronizer identificators
-        end
 
-        def assign_scopes
-          scope :unsynchronized, -> endpoint { joins("LEFT JOIN `api_notify_logs` ON api_notify_logs.api_notify_logable_id = #{self.table_name}.id AND api_notify_logable_type = '#{self.name}' AND api_notify_logs.endpoint='#{endpoint}'").where("api_notify_logs.api_notify_logable_id IS NULL")}
+          def unsynchronized(endpoint)
+            relation = joins("LEFT JOIN `api_notify_logs` ON api_notify_logs.api_notify_logable_id = #{self.table_name}.id AND api_notify_logable_type = '#{self.name}' AND api_notify_logs.endpoint='#{endpoint}'").where("api_notify_logs.api_notify_logable_id IS NULL")
+
+            if methods.include?("#{endpoint}_scope".to_sym)
+              relation = relation.send(send("#{endpoint}_scope"))
+            end
+
+            relation
+          end
         end
 
         def assign_callbacks

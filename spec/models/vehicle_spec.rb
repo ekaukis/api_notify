@@ -306,7 +306,7 @@ describe Vehicle do
 
       FactoryGirl.create(:vehicle, dealer: dealer)
       FactoryGirl.create(:vehicle, dealer: dealer)
-      FactoryGirl.create(:vehicle, dealer: dealer)
+      FactoryGirl.create(:vehicle, dealer: nil)
     end
 
     context "when one item responds with 400 status and two with 201" do
