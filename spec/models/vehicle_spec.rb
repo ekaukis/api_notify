@@ -294,6 +294,13 @@ describe Vehicle do
     it "makes record unsinhronized from api_notify" do
       expect{vehicle.remove_api_notified(:one)}.to change{vehicle.api_notified?(:one)}.from(true).to(false)
     end
+
+    it "removes api notified only if api_notify_log record exists" do
+      expect(vehicle.api_notified?(:one)).to be_truthy
+      vehicle.remove_api_notified(:one)
+      vehicle.remove_api_notified(:one)
+      expect(vehicle.api_notified?(:one)).to be_falsey
+    end
   end
 
 

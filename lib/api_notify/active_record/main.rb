@@ -139,8 +139,7 @@ module ApiNotify
       end
 
       def remove_api_notified endpoint
-        chain = api_notify_logs.find_by(endpoint: endpoint)
-        chain.destroy
+        api_notify_logs.find_by(endpoint: endpoint).try(:destroy)
       end
 
       def notify_children endpoint
