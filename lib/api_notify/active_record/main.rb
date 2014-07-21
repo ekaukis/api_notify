@@ -184,6 +184,17 @@ module ApiNotify
         return get_identificators(endpoint)[self.class.send("#{endpoint}_parent_attribute")].present?
       end
 
+      def parent_api_notified_or_notify_it?(endpoint)
+        if self.class.methods.include?("#{endpoint}_force_parent_sync".to_sym)
+          unless self.send(self.class.send("#{endpoint}_force_parent_sync")).api_notified?(endpoint)
+            self.send(self.class.send("#{endpoint}_force_parent_sync".to_sym)).make_api_notify_call(endpoint)
+            return false
+          end
+        end
+
+        true
+      end
+
       def get_value(field)
         "#{field.to_s}".split('.').inject(self) { |obj, method| obj.present? ? obj.send(method) : "" }
       end
@@ -208,7 +219,7 @@ module ApiNotify
 
       # Create task only if all identificators given, else task will be created after parent object creates it
       def create_task(endpoint, method)
-        return if no_need_to_synchronize?(method, endpoint) || !all_indentificators?(endpoint)
+        return if no_need_to_synchronize?(method, endpoint) || !all_indentificators?(endpoint) || !parent_api_notified_or_notify_it?(endpoint)
 
         LOGGER.info "BEGIN TASK CREATING"
         task = Task.create({

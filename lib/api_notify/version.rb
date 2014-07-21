@@ -1,3 +1,3 @@
 module ApiNotify
-  VERSION = "0.8.20"
+  VERSION = "0.8.21"
 end

@@ -1,8 +1,6 @@
 module ApiNotify
   class Task < ActiveRecord::Base
 
-
-
     self.table_name = :api_notify_tasks
 
     belongs_to :api_notifiable, polymorphic: true

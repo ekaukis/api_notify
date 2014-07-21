@@ -21,7 +21,8 @@ class Vehicle < ActiveRecord::Base
       },
       skip_synchronize: :one_dont_do_synchronize,
       parent_attribute: :one_dealer_id,
-      scope: :one_unsynchronized_scope
+      scope: :one_unsynchronized_scope,
+      force_parent_sync: "dealer"
     },
     other: {
       skip_synchronize: :other_dont_do_synchronize,

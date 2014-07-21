@@ -39,11 +39,12 @@ describe ApiNotify::Task do
         headers: {}
       ).times(1)
 
-
       FactoryGirl.build(:vehicle, dealer: dealer)
     end
 
     let(:subject) do
+      Sidekiq::Testing.inline!
+      dealer.save
       vehicle.save
       vehicle.api_notify_tasks.last
     end
@@ -71,7 +72,9 @@ describe ApiNotify::Task do
 
       it "creates work for synchronization" do
         subject
-        expect(ApiNotify::SynchronizerWorker.jobs.last["args"]).to eq([subject.id])
+        Sidekiq::Testing.fake!
+        vehicle.update_attributes(no: "TEST")
+        expect(ApiNotify::SynchronizerWorker.jobs.last["args"]).to eq([vehicle.api_notify_tasks.last.id])
       end
     end
 
