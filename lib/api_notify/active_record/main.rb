@@ -219,7 +219,7 @@ module ApiNotify
 
       # Create task only if all identificators given, else task will be created after parent object creates it
       def create_task(endpoint, method)
-        return if no_need_to_synchronize?(method, endpoint) || !all_indentificators?(endpoint) || !parent_api_notified_or_notify_it?(endpoint)
+        return if no_need_to_synchronize?(method, endpoint)
 
         LOGGER.info "BEGIN TASK CREATING"
         task = Task.create({
@@ -240,6 +240,11 @@ module ApiNotify
         return true unless ApiNotify.configuration.config_defined?
         return true unless ApiNotify.configuration.endpoint_active?(endpoint)
         return true if skip_api_notify
+
+        if method != "delete"
+          return true unless all_indentificators?(endpoint)
+          return true unless parent_api_notified_or_notify_it?(endpoint)
+        end
 
         if self.class.methods.include? "#{endpoint}_skip_synchronize".to_sym
           return true if send self.class.send("#{endpoint}_skip_synchronize")
