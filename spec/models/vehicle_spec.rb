@@ -37,7 +37,7 @@ describe Vehicle do
 
     describe "#via_api" do
       it "creates api_notify_task" do
-        expect{subject.save}.to change{ApiNotify::Task.all.size}.from(0).to(2)
+        expect{subject.save}.to change{ApiNotify::Task.all.size}.from(0).to(3)
       end
     end
   end

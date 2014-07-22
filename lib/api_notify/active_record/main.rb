@@ -188,10 +188,9 @@ module ApiNotify
         if self.class.methods.include?("#{endpoint}_force_parent_sync".to_sym)
           unless self.send(self.class.send("#{endpoint}_force_parent_sync")).api_notified?(endpoint)
             self.send(self.class.send("#{endpoint}_force_parent_sync".to_sym)).make_api_notify_call(endpoint)
-            return false
+            LOGGER.info "PARENT - #{self.class.send("#{endpoint}_force_parent_sync".to_sym)} SYNCED BY #{self.class}"
           end
         end
-
         true
       end
 
