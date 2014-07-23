@@ -9,7 +9,7 @@ module ApiNotify
     serialize :identificators, Hash
 
     before_validation :make_changes_hash, on: :create
-    validates :changes_hash, uniqueness: {unless: :done}
+    validates :changes_hash, uniqueness: {scope: :done, unless: :done}
     after_commit :setup_task, on: :create
 
     def make_changes_hash

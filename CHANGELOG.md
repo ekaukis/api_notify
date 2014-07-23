@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.26
+* Bug Fix - added :done to unique scope for ApiNotify::Task.
+
 ### 0.8.25
 * Replaced idenficatiors with created_at in concataned string for hash generation
 
