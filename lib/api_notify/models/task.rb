@@ -13,7 +13,7 @@ module ApiNotify
     after_commit :setup_task, on: :create
 
     def make_changes_hash
-      self.changes_hash = Digest::MD5.new.hexdigest("#{api_notifiable_id}#{api_notifiable_type}#{fields_updated.to_s}#{identificators.to_s}#{endpoint}#{method}")
+      self.changes_hash = Digest::MD5.new.hexdigest("#{api_notifiable_id}#{api_notifiable_type}#{fields_updated.to_s}#{created_at.to_s}#{endpoint}#{method}")
     end
 
     def synchronize

@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.25
+* Replaced idenficatiors with created_at in concataned string for hash generation
+
 ### 0.8.24
 * Added sidekiq.logger.warn when sidekiq_retries_exhausted
 * Added changes_hash field to tasks. It allows find unique unsumited tasks and prevent them for double executing.
