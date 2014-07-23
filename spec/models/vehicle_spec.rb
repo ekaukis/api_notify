@@ -37,7 +37,7 @@ describe Vehicle do
 
     describe "#via_api" do
       it "creates api_notify_task" do
-        expect{subject.save}.to change{ApiNotify::Task.all.size}.from(0).to(3)
+        expect{subject.save}.to change{ApiNotify::Task.all.size}.from(0).to(2)
       end
     end
   end
@@ -261,23 +261,28 @@ describe Vehicle do
   end
 
   describe ".make_api_notify_call" do
-    before do
-      Sidekiq::Testing.inline!
-    end
+    context "when new record failed first time" do
+      before { Sidekiq::Testing.fake! }
 
-    context "when new record" do
-      it "makes request" do
+      it "makes another request" do
         stub_request(:post, "https://one.example.com/api/v1/vehicles").
           to_return( status: 400, body: '{ "other": "New info" }', headers: {} ).then.
           to_return( status: 201, body: '{ "other": "New info" }', headers: {} ).then
 
         vehicle = FactoryGirl.create(:vehicle, dealer: dealer)
-        vehicle.make_api_notify_call(:one)
+        begin
+          ApiNotify::SynchronizerWorker.drain
+        rescue ApiNotify::SynchronizerWorker::FailedSynchronization => e
+          ApiNotify::SynchronizerWorker.perform_async(vehicle.api_notify_tasks.last.id)
+          ApiNotify::SynchronizerWorker.drain
+        end
         expect(a_request(:any, "https://one.example.com/api/v1/vehicles")).to have_been_made.times(2)
       end
     end
 
     context "when existing record" do
+      before { Sidekiq::Testing.inline! }
+
       it "makes request" do
         vehicle.make_api_notify_call(:one)
         expect(a_request(:any, "https://one.example.com/api/v1/vehicles")).to have_been_made.times(1)

@@ -21,6 +21,8 @@ ActiveRecord::Schema.define(version: 20140602120014) do
     t.datetime "updated_at"
   end
 
+  add_index "api_notify_logs", ["api_notify_logable_id", "api_notify_logable_type"], name: "api_notify_logs_unique_index_on_api_notify_logable"
+
   create_table "api_notify_tasks", force: true do |t|
     t.text     "fields_updated"
     t.text     "identificators"
@@ -29,10 +31,14 @@ ActiveRecord::Schema.define(version: 20140602120014) do
     t.string   "endpoint"
     t.string   "method"
     t.text     "response"
-    t.boolean  "done",                default: false
+    t.integer  "depending_id"
+    t.boolean  "done",                           default: false
+    t.string   "changes_hash",        limit: 32
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "api_notify_tasks", ["api_notifiable_id", "api_notifiable_type"], name: "api_notify_tasks_unique_index_on_api_notifiable"
 
   create_table "dealers", force: true do |t|
     t.string   "title"

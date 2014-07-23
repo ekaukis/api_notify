@@ -6,5 +6,7 @@ class CreateApiNotifyLogs < ActiveRecord::Migration
 
       t.timestamps
     end
+
+    add_index :api_notify_logs, [:api_notify_logable_id, :api_notify_logable_type], name: :api_notify_logs_unique_index_on_api_notify_logable
   end
 end

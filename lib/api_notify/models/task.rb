@@ -8,7 +8,13 @@ module ApiNotify
     serialize :fields_updated, Array
     serialize :identificators, Hash
 
+    before_validation :make_changes_hash, on: :create
+    validates :changes_hash, uniqueness: {unless: :done}
     after_commit :setup_task, on: :create
+
+    def make_changes_hash
+      self.changes_hash = Digest::MD5.new.hexdigest("#{api_notifiable_id}#{api_notifiable_type}#{fields_updated.to_s}#{identificators.to_s}#{endpoint}#{method}")
+    end
 
     def synchronize
       synchronizer = api_notifiable_type.constantize.synchronizer
@@ -39,6 +45,7 @@ module ApiNotify
     end
 
     def setup_task
+      LOGGER.info "TASK CREATED #{api_notifiable_type} #{api_notifiable_id}"
       SynchronizerWorker.perform_async(id)
     end
   end

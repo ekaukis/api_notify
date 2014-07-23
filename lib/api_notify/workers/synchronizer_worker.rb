@@ -5,6 +5,10 @@ module ApiNotify
 
     class FailedSynchronization < StandardError; end
 
+    sidekiq_retries_exhausted do |msg|
+      Sidekiq.logger.warn "Failed #{msg['class']} with #{msg['args']}: #{msg['error_message']}"
+    end
+
     def perform(id)
       task = Task.find(id)
       task.synchronize
