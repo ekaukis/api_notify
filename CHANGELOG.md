@@ -5,7 +5,7 @@
 * Added changes_hash field to tasks. It allows find unique unsumited tasks and prevent them for double executing.
 * Added LOGGER to setup_task method to inform when task is being created
 ! By this changes you have to create new field for api_notify_tasks
-    add_column :api_notify_tasks, :changes_hash, limit: 32
+    add_column :api_notify_tasks, :changes_hash, :string, limit: 32
     add_index :api_notify_tasks, :changes_hash
 
 ### 0.8.23
