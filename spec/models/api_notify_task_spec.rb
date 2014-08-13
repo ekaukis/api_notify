@@ -55,7 +55,7 @@ describe ApiNotify::Task do
       end
 
       it "sets fields_updated" do
-        expect(subject.fields_updated).to eq([:no, :vin, :make, :dealer_id, "dealer.title", "vehicle_type.title"])
+        expect(subject.fields_updated).to eq([:no, :vin, :dealer_id, "dealer.title", "vehicle_type.title", :make])
       end
 
       it "sets identificators" do

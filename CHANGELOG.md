@@ -1,5 +1,9 @@
 ## Changelog
 
+
+### 0.8.27
+* Added possibility to separate notify_attributes for each endpoint
+
 ### 0.8.26
 * Bug Fix - added :done to unique scope for ApiNotify::Task.
 

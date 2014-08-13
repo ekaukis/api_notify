@@ -157,7 +157,12 @@ module ApiNotify
       ##
       def fields_to_change endpoint
         @must_sync = !api_notified?(endpoint)
-        notify_attributes.inject([]) do |_fields, field|
+        if self.class.methods.include?("#{endpoint}_notify_attributes".to_sym)
+          endpoint_notify_attributes = self.class.send("#{endpoint}_notify_attributes")
+        end
+        endpoint_notify_attributes ||= []
+
+        (notify_attributes + endpoint_notify_attributes).inject([]) do |_fields, field|
           if field_changed?(field) || @must_sync
             _fields << field
           end

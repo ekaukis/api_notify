@@ -30,8 +30,8 @@ describe Vehicle do
     describe ".set_fields_changed" do
       it "sets fields_changed" do
         subject.set_fields_changed
-        expect(subject.fields_changed(:one)).to eq([:no, :vin, :make, :dealer_id, "dealer.title", "vehicle_type.title"])
-        expect(subject.fields_changed(:other)).to eq([:no, :vin, :make, :dealer_id, "dealer.title", "vehicle_type.title"])
+        expect(subject.fields_changed(:one)).to eq([:no, :vin, :dealer_id, "dealer.title", "vehicle_type.title", :make])
+        expect(subject.fields_changed(:other)).to eq([:no, :vin, :dealer_id, "dealer.title", "vehicle_type.title"])
       end
     end
 

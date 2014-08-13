@@ -6,7 +6,6 @@ class Vehicle < ActiveRecord::Base
   api_notify [
     :no,
     :vin,
-    :make,
     :dealer_id,
     'dealer.title',
     'vehicle_type.title'
@@ -16,6 +15,9 @@ class Vehicle < ActiveRecord::Base
   },
   {
     one: {
+      notify_attributes: [
+        :make
+      ],
       identificators: {
         one_dealer_id: "dealer.other_system_id"
       },
