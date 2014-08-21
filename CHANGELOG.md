@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.28
+* Refactored existing method finding
+* Limited response length in Log files
 
 ### 0.8.27
 * Added possibility to separate notify_attributes for each endpoint
