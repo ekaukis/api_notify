@@ -81,7 +81,7 @@ module ApiNotify
 
       private
         def log_response
-          LOGGER.info "Response #{response[:status]}: #{ response[:body] }\n"
+          LOGGER.info "Response #{response[:status]}: #{ response[:body].to_s.truncate(1000, separator: "\n") if response[:body] }\n"
         end
     end
   end

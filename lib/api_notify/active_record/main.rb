@@ -143,7 +143,7 @@ module ApiNotify
       end
 
       def notify_children endpoint
-        if self.class.methods.include?("#{endpoint}_children".to_sym)
+        if method_exists? "#{endpoint}_children"
           self.class.send("#{endpoint}_children").each do |child_class|
             self.send(child_class).unsynchronized(endpoint).each do |resource|
               resource.make_api_notify_call(endpoint)
@@ -157,7 +157,7 @@ module ApiNotify
       ##
       def fields_to_change endpoint
         @must_sync = !api_notified?(endpoint)
-        if self.class.methods.include?("#{endpoint}_notify_attributes".to_sym)
+        if method_exists? "#{endpoint}_notify_attributes"
           endpoint_notify_attributes = self.class.send("#{endpoint}_notify_attributes")
         end
         endpoint_notify_attributes ||= []
@@ -175,7 +175,7 @@ module ApiNotify
       end
 
       def get_identificators(endpoint)
-        if self.class.methods.include?("#{endpoint}_identificators".to_sym)
+        if method_exists? "#{endpoint}_identificators"
           additional = self.class.send("#{endpoint}_identificators")
         else
           additional = {}
@@ -185,17 +185,18 @@ module ApiNotify
       end
 
       def all_indentificators?(endpoint)
-        return true unless self.class.methods.include?("#{endpoint}_parent_attribute".to_sym)
+        return true unless method_exists? "#{endpoint}_parent_attribute"
         return get_identificators(endpoint)[self.class.send("#{endpoint}_parent_attribute")].present?
       end
 
       def parent_api_notified_or_notify_it?(endpoint)
-        if self.class.methods.include?("#{endpoint}_force_parent_sync".to_sym)
-          unless self.send(self.class.send("#{endpoint}_force_parent_sync")).api_notified?(endpoint)
-            self.send(self.class.send("#{endpoint}_force_parent_sync".to_sym)).make_api_notify_call(endpoint)
-            LOGGER.info "PARENT - #{self.class.send("#{endpoint}_force_parent_sync".to_sym)} SYNCED BY #{self.class}"
-          end
+        return true unless method_exists? "#{endpoint}_force_parent_sync"
+
+        unless self.send(self.class.send("#{endpoint}_force_parent_sync")).api_notified?(endpoint)
+          self.send(self.class.send("#{endpoint}_force_parent_sync".to_sym)).make_api_notify_call(endpoint)
+          LOGGER.info "PARENT - #{self.class.send("#{endpoint}_force_parent_sync".to_sym)} SYNCED BY #{self.class}"
         end
+
         true
       end
 
@@ -250,7 +251,7 @@ module ApiNotify
           return true unless parent_api_notified_or_notify_it?(endpoint)
         end
 
-        if self.class.methods.include? "#{endpoint}_skip_synchronize".to_sym
+        if method_exists? "#{endpoint}_skip_synchronize"
           return true if send self.class.send("#{endpoint}_skip_synchronize")
         end
 
@@ -277,6 +278,13 @@ module ApiNotify
           super
         end
       end
+
+      private
+
+      def method_exists? method_name
+        self.class.methods.include? method_name.to_sym
+      end
+
     end
   end
 end
