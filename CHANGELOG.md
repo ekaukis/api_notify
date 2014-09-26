@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.29
+* Added config_object to Configuration class. It allows to define config outside config.yml.
+
 ### 0.8.28
 * Refactored existing method finding
 * Limited response length in Log files

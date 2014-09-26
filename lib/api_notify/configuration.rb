@@ -23,11 +23,12 @@ module ApiNotify
   # This is extended by ApiNotify to provide configuration settings.
   class Configuration
 
-    attr_accessor :active, :config_file
+    attr_accessor :active, :config_file, :config_object
 
     # Configuration parameters
     def initialize
       @config_file = "#{Rails.root.to_s}/config/api_notify.yml"
+      @config_object = nil
       @active = true
     end
 
@@ -36,15 +37,15 @@ module ApiNotify
     end
 
     def config_hash
-       @_config_hash ||= YAML.load_file(@config_file)[Rails.env] if File.exists?(@config_file)
+      @_config_hash ||=  config_from_yaml || @config_object
+    end
+
+    def config_from_yaml
+      YAML.load_file(@config_file).try(:[], Rails.env) if File.exists?(@config_file)
     end
 
     def config_defined?
-      return false unless File.exists?(@config_file)
-      config = YAML.load_file(@config_file)
-
-      return false unless config
-      return config.has_key?(Rails.env)
+      config_from_yaml || @config_object ? true : false
     end
 
     def endpoints
