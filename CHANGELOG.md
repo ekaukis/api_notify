@@ -1,5 +1,9 @@
 ## Changelog
 
+### 0.8.30
+* Fixed bug when using method ApiNotify.configuration.endpoint_active? and configuration not defined
+* Add job to failed only when retries exhaused
+
 ### 0.8.29
 * Added config_object to Configuration class. It allows to define config outside config.yml.
 

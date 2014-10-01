@@ -49,7 +49,7 @@ module ApiNotify
     end
 
     def endpoints
-      config_hash.inject([]){|res, (k,v)| res << k; res}
+      config_defined? ? config_hash.map{ |endpoint, data| endpoint } : []
     end
 
     def endpoint_active? endpoint

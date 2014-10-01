@@ -31,4 +31,21 @@ describe ApiNotify::Configuration do
       expect(a_request(:post, "https://one.example.com/api/v1/vehicles")).to have_not_been_made
     end
   end
+
+  describe ".endpoint_active?" do
+    context "when config_hash nil" do
+      it "return false" do
+        allow(ApiNotify.configuration).to receive(:config_defined?).and_return(false)
+        expect(ApiNotify.configuration.endpoint_active?(:one)).to be_falsey
+      end
+    end
+
+    context "when config_hash with endpoint one" do
+      it "return true" do
+        expect(ApiNotify.configuration.endpoint_active?(:one)).to be_truthy
+      end
+    end
+  end
+
+
 end

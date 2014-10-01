@@ -1,7 +1,7 @@
 module ApiNotify
   class SynchronizerWorker
     include Sidekiq::Worker
-    sidekiq_options :retry => 5
+    sidekiq_options retry: 5, failures: :exhausted
 
     class FailedSynchronization < StandardError; end
 
