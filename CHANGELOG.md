@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.31
+* Fixed bug when not synchronizing children without changes
+
 ### 0.8.30
 * Fixed bug when using method ApiNotify.configuration.endpoint_active? and configuration not defined
 * Add job to failed only when retries exhaused

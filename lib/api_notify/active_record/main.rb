@@ -255,7 +255,7 @@ module ApiNotify
           return true if send self.class.send("#{endpoint}_skip_synchronize")
         end
 
-        if method != "delete" && fields_changed(endpoint).empty?
+        if method != "delete" && (fields_changed(endpoint).empty? && api_notified?(endpoint))
           return true
         end
 
