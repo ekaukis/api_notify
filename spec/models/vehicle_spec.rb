@@ -37,7 +37,7 @@ describe Vehicle do
 
     describe "#via_api" do
       it "creates api_notify_task" do
-        expect{subject.save}.to change{ApiNotify::Task.all.size}.from(0).to(2)
+        expect{subject.save}.to change{ApiNotify::Task.all.size}.from(0).to(1)
       end
     end
   end
@@ -268,6 +268,9 @@ describe Vehicle do
         stub_request(:post, "https://one.example.com/api/v1/vehicles").
           to_return( status: 400, body: '{ "other": "New info" }', headers: {} ).then.
           to_return( status: 201, body: '{ "other": "New info" }', headers: {} ).then
+
+        dealer
+        ApiNotify::SynchronizerWorker.drain
 
         vehicle = FactoryGirl.create(:vehicle, dealer: dealer)
         begin

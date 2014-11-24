@@ -32,4 +32,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'webmock'
   s.add_development_dependency "sqlite3"
   s.add_development_dependency "test_after_commit"
+  s.add_development_dependency "pry"
 end
