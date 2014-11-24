@@ -193,6 +193,7 @@ module ApiNotify
         return true unless method_exists? "#{endpoint}_force_parent_sync"
 
         unless self.send(self.class.send("#{endpoint}_force_parent_sync")).api_notified?(endpoint)
+          self.remove_api_notified(endpoint)
           self.send(self.class.send("#{endpoint}_force_parent_sync".to_sym)).make_api_notify_call(endpoint)
           LOGGER.info "PARENT - #{self.class.send("#{endpoint}_force_parent_sync".to_sym)} SYNCED BY #{self.class}"
           return false

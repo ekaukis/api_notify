@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.33
+* When forcing parent synchronize remove self api notified link
+
 ### 0.8.32
 * Fixed bug when forcing parent to be synchronized first, child gets synchronized at the same time
 
