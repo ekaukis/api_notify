@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.32
+* Fixed bug when forcing parent to be synchronized first, child gets synchronized at the same time
+
 ### 0.8.31
 * Fixed bug when not synchronizing children without changes
 
