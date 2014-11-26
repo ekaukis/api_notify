@@ -31,9 +31,13 @@ module ApiNotify
     def send_callback synchronizer
       api_notifiable.disable_api_notify
       if synchronizer.success?
-        api_notifiable.make_api_notified endpoint
-        api_notifiable.send("#{endpoint}_api_notify_#{method}_success", synchronizer.response)
-        api_notifiable.notify_children endpoint
+        if remote_destroyed?(synchronizer.response)
+          api_notifiable.remove_api_notified(endpoint)
+        else
+          api_notifiable.make_api_notified endpoint
+          api_notifiable.send("#{endpoint}_api_notify_#{method}_success", synchronizer.response)
+          api_notifiable.notify_children endpoint
+        end
       else
         api_notifiable.send("#{endpoint}_api_notify_#{method}_failed", synchronizer.response)
       end
@@ -47,6 +51,10 @@ module ApiNotify
     def setup_task
       LOGGER.info "TASK CREATED #{api_notifiable_type} #{api_notifiable_id}"
       SynchronizerWorker.perform_async(id)
+    end
+
+    def remote_destroyed?(response)
+      response[:body].try(:[], "api_notify_destroyed") ? true : false
     end
   end
 end

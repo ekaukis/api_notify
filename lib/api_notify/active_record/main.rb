@@ -51,11 +51,9 @@ module ApiNotify
         end
 
         def assign_callbacks
-          after_update :post_via_api
-          after_create :post_via_api
+          after_save :post_via_api
+          before_save :post_gather_changes
           after_destroy :delete_via_api
-          before_update :post_gather_changes
-          before_create :post_gather_changes
           before_destroy :delete_gather_changes
         end
 
@@ -189,17 +187,31 @@ module ApiNotify
         return get_identificators(endpoint)[self.class.send("#{endpoint}_parent_attribute")].present?
       end
 
+      #
+      # 1. Skip and allow to sync if not forecing parent
+      # 2. Allow to sync if parent synced
+      # 3. Try to create task for parent (checks for no_need_to_synchronize).
+      #    If task created stop current task, else continue.
+      #
+      # ! If parent task created, we need to remove current synch status, for parent to see the child
+      # ! When parent_attribtue active, forece_vehicle_sync doesn't work
+      #
       def parent_api_notified_or_notify_it?(endpoint)
         return true unless method_exists? "#{endpoint}_force_parent_sync"
 
-        unless self.send(self.class.send("#{endpoint}_force_parent_sync")).api_notified?(endpoint)
-          self.remove_api_notified(endpoint)
-          self.send(self.class.send("#{endpoint}_force_parent_sync".to_sym)).make_api_notify_call(endpoint)
-          LOGGER.info "PARENT - #{self.class.send("#{endpoint}_force_parent_sync".to_sym)} SYNCED BY #{self.class}"
-          return false
+        if send(self.class.send("#{endpoint}_force_parent_sync")).api_notified?(endpoint)
+          true
+        else
+          made = send(self.class.send("#{endpoint}_force_parent_sync".to_sym)).make_api_notify_call(endpoint)
+          if made
+            remove_api_notified(endpoint)
+            LOGGER.info "PARENT #{self.class.send("#{endpoint}_force_parent_sync".to_sym)} SYNCED BY #{self.class}"
+            false
+          else
+            LOGGER.info "PARENT #{self.class.send("#{endpoint}_force_parent_sync".to_sym)} CAN'T BE SYNCED BY #{self.class}"
+            true
+          end
         end
-
-        true
       end
 
       def get_value(field)

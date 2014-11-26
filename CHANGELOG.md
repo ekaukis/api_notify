@@ -1,5 +1,10 @@
 ## Changelog
 
+### 0.8.34
+* Changed callbacks from create|update to save
+* Allow to track if object is deleted in other system
+* Updated force_parent_sync method, allowing to continue current task unless parent task isn't created
+
 ### 0.8.33
 * When forcing parent synchronize remove self api notified link
 

@@ -78,6 +78,50 @@ describe ApiNotify::Task do
       end
     end
 
+    context "when change parameter that destroys object" do
+      context "when api_notify_destroyed false" do
+        before do
+          subject
+          stub_request(:post, "https://one.example.com/api/v1/vehicles")
+          .to_return(
+            status: 201,
+            body: '{
+              "other": "New info",
+              "api_notify_destroyed": false
+            }',
+            headers: {}
+          ).times(1)
+        end
+
+        it "doesn't removes api_notify_log record" do
+          expect(vehicle.api_notified?(:one)).to be_truthy
+          vehicle.update_attributes(no: "TEST12")
+          expect(vehicle.api_notified?(:one)).to be_truthy
+        end
+      end
+
+      context "when api_notify_destroyed true" do
+        before do
+          subject
+          stub_request(:post, "https://one.example.com/api/v1/vehicles")
+          .to_return(
+            status: 201,
+            body: '{
+              "other": "New info",
+              "api_notify_destroyed": true
+            }',
+            headers: {}
+          ).times(1)
+        end
+
+        it "removes api_notify_log record" do
+          expect(vehicle.api_notified?(:one)).to be_truthy
+          vehicle.update_attributes(no: "TEST12")
+          expect(vehicle.api_notified?(:one)).to be_falsey
+        end
+      end
+    end
+
     context "when perform task" do
       before do
         Sidekiq::Testing.inline!
