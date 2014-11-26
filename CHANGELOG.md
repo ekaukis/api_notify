@@ -1,5 +1,9 @@
 ## Changelog
 
+### 0.8.35
+* Added synchronized scope
+* When parent sync info removed, remove child sync info also
+
 ### 0.8.34
 * Changed callbacks from create|update to save
 * Allow to track if object is deleted in other system

@@ -82,7 +82,7 @@ describe ApiNotify::Task do
       context "when api_notify_destroyed false" do
         before do
           subject
-          stub_request(:post, "https://one.example.com/api/v1/vehicles")
+          stub_request(:post, "https://one.example.com/api/v1/dealers")
           .to_return(
             status: 201,
             body: '{
@@ -94,16 +94,16 @@ describe ApiNotify::Task do
         end
 
         it "doesn't removes api_notify_log record" do
-          expect(vehicle.api_notified?(:one)).to be_truthy
-          vehicle.update_attributes(no: "TEST12")
-          expect(vehicle.api_notified?(:one)).to be_truthy
+          expect(dealer.api_notified?(:one)).to be_truthy
+          dealer.update_attributes(title: "TEST12")
+          expect(dealer.api_notified?(:one)).to be_truthy
         end
       end
 
       context "when api_notify_destroyed true" do
         before do
           subject
-          stub_request(:post, "https://one.example.com/api/v1/vehicles")
+          stub_request(:post, "https://one.example.com/api/v1/dealers")
           .to_return(
             status: 201,
             body: '{
@@ -115,9 +115,9 @@ describe ApiNotify::Task do
         end
 
         it "removes api_notify_log record" do
-          expect(vehicle.api_notified?(:one)).to be_truthy
-          vehicle.update_attributes(no: "TEST12")
-          expect(vehicle.api_notified?(:one)).to be_falsey
+          expect(dealer.api_notified?(:one)).to be_truthy
+          dealer.update_attributes(title: "TEST12")
+          expect(dealer.api_notified?(:one)).to be_falsey
         end
       end
     end

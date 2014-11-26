@@ -33,6 +33,7 @@ module ApiNotify
       if synchronizer.success?
         if remote_destroyed?(synchronizer.response)
           api_notifiable.remove_api_notified(endpoint)
+          api_notifiable.remove_api_notified_children(endpoint)
         else
           api_notifiable.make_api_notified endpoint
           api_notifiable.send("#{endpoint}_api_notify_#{method}_success", synchronizer.response)

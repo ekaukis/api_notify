@@ -48,6 +48,10 @@ module ApiNotify
 
             relation
           end
+
+          def synchronized(endpoint)
+            joins("INNER JOIN `api_notify_logs` ON api_notify_logs.api_notify_logable_id = #{self.table_name}.id AND api_notify_logable_type = '#{self.name}' AND api_notify_logs.endpoint='#{endpoint}'")
+          end
         end
 
         def assign_callbacks
@@ -140,6 +144,14 @@ module ApiNotify
         api_notify_logs.find_by(endpoint: endpoint).try(:destroy)
       end
 
+      def remove_api_notified_children(endpoint)
+        if method_exists? "#{endpoint}_children"
+          self.class.send("#{endpoint}_children").each do |child_class|
+            self.send(child_class).synchronized(endpoint).each { |resource| resource.remove_api_notified(endpoint) }
+          end
+        end
+      end
+
       def notify_children endpoint
         if method_exists? "#{endpoint}_children"
           self.class.send("#{endpoint}_children").each do |child_class|
@@ -150,6 +162,7 @@ module ApiNotify
           end
         end
       end
+
       ##
       # If @must_sync == true then forces all attributes to be synchronized
       ##
