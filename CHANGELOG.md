@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.36
+* Parent_attribute now works together with force_parent_sync
+
 ### 0.8.35
 * Added synchronized scope
 * When parent sync info removed, remove child sync info also

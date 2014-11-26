@@ -196,6 +196,7 @@ module ApiNotify
       end
 
       def all_indentificators?(endpoint)
+        return false unless parent_api_notified_or_notify_it?(endpoint)
         return true unless method_exists? "#{endpoint}_parent_attribute"
         return get_identificators(endpoint)[self.class.send("#{endpoint}_parent_attribute")].present?
       end
@@ -207,10 +208,10 @@ module ApiNotify
       #    If task created stop current task, else continue.
       #
       # ! If parent task created, we need to remove current synch status, for parent to see the child
-      # ! When parent_attribtue active, forece_vehicle_sync doesn't work
       #
       def parent_api_notified_or_notify_it?(endpoint)
         return true unless method_exists? "#{endpoint}_force_parent_sync"
+        return false unless send(self.class.send("#{endpoint}_force_parent_sync"))
 
         if send(self.class.send("#{endpoint}_force_parent_sync")).api_notified?(endpoint)
           true
@@ -275,7 +276,6 @@ module ApiNotify
 
         if method != "delete"
           return true unless all_indentificators?(endpoint)
-          return true unless parent_api_notified_or_notify_it?(endpoint)
         end
 
         if method_exists? "#{endpoint}_skip_synchronize"
