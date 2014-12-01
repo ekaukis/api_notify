@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "sidekiq",           '~> 2.17.0'
   s.add_dependency "sidekiq-cron",      "~> 0.1.0"
-  s.add_dependency "rails",             '~> 4.0.5'
+  s.add_dependency "rails",             '~> 4.1.0'
   s.add_development_dependency "fakeredis"
   s.add_development_dependency "rspec-sidekiq"
   s.add_development_dependency "rspec-rails"
