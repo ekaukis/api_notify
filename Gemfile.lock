@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     api_notify (0.8.36)
-      rails (~> 4.1.0)
       sidekiq (~> 2.17.0)
       sidekiq-cron (~> 0.1.0)
 
@@ -164,6 +163,7 @@ DEPENDENCIES
   factory_girl_rails
   fakeredis
   pry
+  rails
   rspec-rails
   rspec-sidekiq
   shoulda-matchers
