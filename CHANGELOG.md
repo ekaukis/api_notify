@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.37
+* Removed sidekiq version dependency
+
 ### 0.8.36
 * Parent_attribute now works together with force_parent_sync
 

@@ -109,6 +109,12 @@ module ApiNotify
       ##
       # Helper methods for activrecord instance
       ##
+      def without_api_notify
+        self.skip_api_notify = true
+        yield
+        self.skip_api_notify = false
+      end
+
       def disable_api_notify
         self.skip_api_notify = true
       end

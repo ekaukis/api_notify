@@ -19,8 +19,8 @@ Gem::Specification.new do |s|
   s.test_files    = s.files.grep(/^spec\//)
   s.require_path = "lib"
 
-  s.add_dependency "sidekiq",           '~> 2.17.0'
-  s.add_dependency "sidekiq-cron",      "~> 0.1.0"
+  s.add_dependency "sidekiq"
+  s.add_dependency "sidekiq-cron"
   s.add_development_dependency "rails"
   s.add_development_dependency "fakeredis"
   s.add_development_dependency "rspec-sidekiq"

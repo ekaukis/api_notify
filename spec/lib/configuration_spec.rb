@@ -9,7 +9,7 @@ describe ApiNotify::Configuration do
     stub_request(:post, "https://one.example.com/api/v1/vehicles")
       .to_return(status: 201, body: '{"other": "New info"}', headers: {})
 
-    FactoryGirl.build(:vehicle)
+    build(:vehicle)
   end
 
   context "when api_notify active" do

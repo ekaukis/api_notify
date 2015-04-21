@@ -6,7 +6,7 @@ describe ApiNotify::SynchronizerWorker do
     stub_request(:post, "https://one.example.com/api/v1/dealers").
       to_return(status: 201, body: '{ "other": "10" }')
 
-    dealer = FactoryGirl.create(:dealer)
+    dealer = create(:dealer)
     described_class.drain
     dealer
   end

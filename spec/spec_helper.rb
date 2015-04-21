@@ -5,7 +5,7 @@ require 'simplecov'
 SimpleCov.start 'rails'
 
 require File.expand_path("../dummy/config/environment", __FILE__)
-
+require 'pry'
 require 'sidekiq/testing'
 require 'database_cleaner'
 require 'rspec/rails'
@@ -30,6 +30,9 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = false
   config.infer_base_class_for_anonymous_controllers = false
   config.order = "random"
+
+  # FactoryGirl
+  config.include FactoryGirl::Syntax::Methods
 
   config.before(:suite) do
     DatabaseCleaner.strategy = :transaction

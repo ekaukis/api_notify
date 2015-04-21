@@ -5,25 +5,25 @@ describe ApiNotify::ActiveRecord::Synchronizer do
   let(:vehicle) do
     stub_request(:post, "https://example.com/api/v1/vehicles").
       to_return( status: 201, body: '{ "other": "New info" }', headers: {} )
-    FactoryGirl.create(:vehicle)
+    create(:vehicle)
   end
 
   let(:vehicle_error) do
     stub_request(:post, "https://example.com/api/v1/vehicles").
       to_return( status: 400, body: '{ "other": "New info" }', headers: {} )
-    FactoryGirl.create(:vehicle)
+    create(:vehicle)
   end
 
   let(:vehicle_failed) do
     stub_request(:post, "https://example.com/api/v1/vehicles").
       to_raise(StandardError)
-    FactoryGirl.create(:vehicle)
+    create(:vehicle)
   end
 
   let(:vehicle_syntax) do
     stub_request(:post, "https://example.com/api/v1/vehicles").
       to_return( status: 400, body: '{ other: "New info" }', headers: {} )
-    FactoryGirl.create(:vehicle)
+    create(:vehicle)
   end
 
   describe ".initialize" do

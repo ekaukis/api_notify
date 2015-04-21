@@ -17,7 +17,7 @@ describe ApiNotify::Task do
         headers: {}
       ).times(1)
 
-      FactoryGirl.create(:dealer_synchronized)
+      create(:dealer_synchronized)
     end
 
     let(:vehicle) do
@@ -39,7 +39,7 @@ describe ApiNotify::Task do
         headers: {}
       ).times(1)
 
-      FactoryGirl.build(:vehicle, dealer: dealer)
+      build(:vehicle, dealer: dealer)
     end
 
     let(:subject) do
@@ -161,7 +161,7 @@ describe ApiNotify::Task do
   describe ".synchronize" do
     context "when error received" do
       it "raise error" do
-        dealer = FactoryGirl.create(:dealer)
+        dealer = create(:dealer)
         expect{ApiNotify::SynchronizerWorker.drain}.to raise_error(ApiNotify::SynchronizerWorker::FailedSynchronization)
       end
     end

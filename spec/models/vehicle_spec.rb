@@ -8,14 +8,14 @@ describe Vehicle do
     stub_request(:post, "https://one.example.com/api/v1/vehicles")
       .to_return( status: 201, body: '{ "other": "New info" }', headers: {} )
 
-    FactoryGirl.create(:vehicle, dealer: dealer)
+    create(:vehicle, dealer: dealer)
   end
 
   let(:dealer) do
     stub_request(:post, "https://one.example.com/api/v1/dealers")
       .to_return( status: 201, body: '{ "other_system_id": "10" }', headers: {} )
 
-    FactoryGirl.create(:dealer_synchronized)
+    create(:dealer_synchronized)
   end
 
   describe "ActiveRecord associations" do
@@ -24,8 +24,8 @@ describe Vehicle do
   end
 
   describe "#api_notify methods" do
-    let(:dealer) { FactoryGirl.create(:dealer_synchronized) }
-    let(:subject) { FactoryGirl.build(:vehicle, dealer: dealer) }
+    let(:dealer) { create(:dealer_synchronized) }
+    let(:subject) { build(:vehicle, dealer: dealer) }
 
     describe ".set_fields_changed" do
       it "sets fields_changed" do
@@ -173,7 +173,7 @@ describe Vehicle do
         stub_request(:post, "https://one.example.com/api/v1/dealers")
           .to_return( status: 201, body: '{ "other_system_id": "10" }', headers: {} )
 
-        dealer = FactoryGirl.create(:dealer_synchronized)
+        dealer = create(:dealer_synchronized)
         vehicle.dealer_id = dealer.id
         expect(vehicle.fill_fields_with_values(vehicle.set_fields_changed[:one])).to eq({:dealer_id=>dealer.id})
       end
@@ -272,7 +272,7 @@ describe Vehicle do
         dealer
         ApiNotify::SynchronizerWorker.drain
 
-        vehicle = FactoryGirl.create(:vehicle, dealer: dealer)
+        vehicle = create(:vehicle, dealer: dealer)
         begin
           ApiNotify::SynchronizerWorker.drain
         rescue ApiNotify::SynchronizerWorker::FailedSynchronization => e
@@ -316,12 +316,16 @@ describe Vehicle do
     before do
       Sidekiq::Testing.inline!
       stub_request(:post, "https://one.example.com/api/v1/vehicles").
-        to_return( status: 400, body: '{ "other": "New info" }', headers: {} ).then.
         to_return( status: 201, body: '{ "other": "New info" }', headers: {} ).then
 
-      FactoryGirl.create(:vehicle, dealer: dealer)
-      FactoryGirl.create(:vehicle, dealer: dealer)
-      FactoryGirl.create(:vehicle, dealer: nil)
+
+      vehicle = build(:vehicle, dealer: dealer)
+      vehicle.without_api_notify do
+        vehicle.save
+      end
+
+      create(:vehicle, dealer: dealer)
+      create(:vehicle, dealer: nil)
     end
 
     context "when one item responds with 400 status and two with 201" do

@@ -17,13 +17,13 @@ describe Dealer do
       stub_request(:post, "https://one.example.com/api/v1/vehicles").
         to_return( status: 201, body: '{ "other": "New info" }', headers: {} )
 
-      vehicle = FactoryGirl.create(:vehicle)
+      vehicle = create(:vehicle)
       ApiNotify::SynchronizerWorker.drain
       vehicle.remove_api_notified(:one)
 
       expect(vehicle.api_notified?(:one)).to be_falsey
 
-      dealer = FactoryGirl.build(:dealer)
+      dealer = build(:dealer)
       dealer.vehicles.build FactoryGirl.attributes_for(:vehicle)
       dealer.save
 
