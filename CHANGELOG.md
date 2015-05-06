@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.38
+* set_params returns self
+
 ### 0.8.37
 * Removed sidekiq version dependency
 

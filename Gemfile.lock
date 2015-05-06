@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    api_notify (0.8.36)
+    api_notify (0.8.38)
       sidekiq
       sidekiq-cron
 

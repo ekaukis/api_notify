@@ -77,6 +77,7 @@ module ApiNotify
 
       def set_params params
         @_params = params
+        self
       end
 
       private
