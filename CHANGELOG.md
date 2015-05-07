@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.39
+* Synchronizer#send_request returns parsed response
+
 ### 0.8.38
 * set_params returns self
 

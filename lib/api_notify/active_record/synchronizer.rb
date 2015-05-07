@@ -50,7 +50,7 @@ module ApiNotify
         end
 
         log_response
-        @_response
+        response
       end
 
       def params_query
