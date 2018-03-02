@@ -204,7 +204,14 @@ module ApiNotify
       def all_indentificators?(endpoint)
         return false unless parent_api_notified_or_notify_it?(endpoint)
         return true unless method_exists? "#{endpoint}_parent_attribute"
-        return get_identificators(endpoint)[self.class.send("#{endpoint}_parent_attribute")].present?
+
+        if get_identificators(endpoint)[self.class.send("#{endpoint}_parent_attribute")].present?
+          true
+        elsif respond_to? "#{endpoint}_parent_sync_optional?"
+          send "#{endpoint}_parent_sync_optional?"
+        else
+          false
+        end
       end
 
       #
