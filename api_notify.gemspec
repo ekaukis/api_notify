@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "sidekiq"
   s.add_dependency "sidekiq-cron"
+  s.add_dependency "rufus-scheduler", '3.2.1'
   s.add_development_dependency "rails"
   s.add_development_dependency "fakeredis"
   s.add_development_dependency "rspec-sidekiq"
