@@ -224,7 +224,7 @@ module ApiNotify
       #
       def parent_api_notified_or_notify_it?(endpoint)
         return true unless method_exists? "#{endpoint}_force_parent_sync"
-        return false unless send(self.class.send("#{endpoint}_force_parent_sync"))
+        return true unless send(self.class.send("#{endpoint}_force_parent_sync"))
 
         if send(self.class.send("#{endpoint}_force_parent_sync")).api_notified?(endpoint)
           true
