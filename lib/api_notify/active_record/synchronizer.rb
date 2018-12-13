@@ -35,7 +35,7 @@ module ApiNotify
       end
 
       def request_id
-        @request_id ||= "ReQ#{ Time.current.to_i }"
+        @request_id ||= "ReQ#{ Time.current.to_i }#{ SecureRandom.urlsafe_base64(9) }"
       end
 
       def send_request(type = 'GET', url_param = false, endpoint)

@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.41
+* More realistice request numbers
+
 ### 0.8.40
 * Updated Request/Response loggin, by connecting them with identifier
 
