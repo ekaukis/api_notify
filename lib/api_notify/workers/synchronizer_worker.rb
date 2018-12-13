@@ -12,7 +12,8 @@ module ApiNotify
     def perform(id)
       task = Task.find(id)
       task.synchronize
-      raise FailedSynchronization, task.response unless task.done
+
+      raise FailedSynchronization.new(task.response) unless task.done
     end
   end
 end

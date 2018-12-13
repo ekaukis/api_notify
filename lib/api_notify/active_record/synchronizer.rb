@@ -7,24 +7,27 @@ module ApiNotify
       require "net/http"
       require 'net/https'
 
-      def initialize route_name, id_param
+      def initialize(route_name, id_param)
         @_params = {}
         @route_name = route_name
         @id_param = id_param
       end
 
       def response
-        begin
-          { status: @_response.code, body: JSON.parse(@_response.body) }
-        rescue JSON::ParserError, NoMethodError => e
-
-          case e.class.name
-          when "NoMethodError"
-            { status: e.class.name, body: "#{@_response[:error].message}" }
-          when "JSON::ParserError"
-            { status: e.class.name, body: "#{e.message.truncate(1000, separator: "\n")}" }
-          end
-        end
+        {
+          status: @_response.code,
+          body: JSON.parse(@_response.body)
+        }
+      rescue JSON::ParserError => e
+        {
+          status: e.class.name,
+          body: e.message.truncate(1000, separator: "\n")
+        }
+      rescue NoMethodError => e
+        {
+          status: e.class.name,
+          body: @_response[:error].message
+        }
       end
 
       def success?
@@ -32,8 +35,9 @@ module ApiNotify
       end
 
       def send_request(type = 'GET', url_param = false, endpoint)
-
-        raise FailedSynchronization, "missing configuration" unless ApiNotify.configuration.config_defined?
+        unless ApiNotify.configuration.config_defined?
+          raise FailedSynchronization, "missing configuration"
+        end
 
         @config = ApiNotify.configuration.config(endpoint)
         begin

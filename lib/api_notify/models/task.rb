@@ -13,38 +13,59 @@ module ApiNotify
     after_commit :setup_task, on: :create
 
     def make_changes_hash
-      self.changes_hash = Digest::MD5.new.hexdigest("#{api_notifiable_id}#{api_notifiable_type}#{fields_updated.to_s}#{created_at.to_s}#{endpoint}#{method}")
+      self.changes_hash =
+        Digest::MD5.new.hexdigest(
+          [
+            api_notifiable_id,
+            api_notifiable_type,
+            fields_updated.to_s,
+            created_at.to_s,
+            endpoint,
+            method
+          ].join
+        )
+    end
+
+    def synchronizer
+      @synchronizer ||=
+        api_notifiable_type.constantize.synchronizer
     end
 
     def synchronize
-      synchronizer = api_notifiable_type.constantize.synchronizer
       synchronizer.set_params(attributes)
-      begin
-        synchronizer.send_request(method.upcase, false, endpoint)
-        send_callback(synchronizer) unless method == "delete"
-        update_attributes(done: synchronizer.success?, response: synchronizer.response.to_json)
+      synchronizer.send_request(method.upcase, false, endpoint)
 
-        LOGGER.info "Synchronizer Resonse #{ api_notifiable.class.to_s } #{ api_notifiable.try(:id) }: #{synchronizer.response.to_json}"
-      rescue ApiNotify::ActiveRecord::Synchronizer::FailedSynchronization => e
-        LOGGER.info "Exception raised: #{e.message}"
-      end
+      send_callback unless method == "delete"
+
+      update!(
+        done: synchronizer.success?,
+        response: synchronizer.response.to_json
+      )
+    rescue ApiNotify::ActiveRecord::Synchronizer::FailedSynchronization => e
+      LOGGER.info("Exception raised: #{ e.message }")
     end
 
-    def send_callback synchronizer
-      api_notifiable.disable_api_notify
-      if synchronizer.success?
-        if remote_destroyed?(synchronizer.response)
-          api_notifiable.remove_api_notified(endpoint)
-          api_notifiable.remove_api_notified_children(endpoint)
+    def send_callback
+      api_notifiable.without_api_notify do
+        if synchronizer.success?
+          if remote_destroyed?(synchronizer.response)
+            api_notifiable.remove_api_notified(endpoint)
+            api_notifiable.remove_api_notified_children(endpoint)
+          else
+            api_notifiable.make_api_notified(endpoint)
+            api_notifiable.send(
+              "#{ endpoint }_api_notify_#{ method }_success",
+              synchronizer.response
+            )
+            api_notifiable.notify_children(endpoint)
+          end
         else
-          api_notifiable.make_api_notified endpoint
-          api_notifiable.send("#{endpoint}_api_notify_#{method}_success", synchronizer.response)
-          api_notifiable.notify_children endpoint
+          api_notifiable.send(
+            "#{ endpoint }_api_notify_#{ method }_failed",
+            synchronizer.response
+          )
         end
-      else
-        api_notifiable.send("#{endpoint}_api_notify_#{method}_failed", synchronizer.response)
       end
-      api_notifiable.enable_api_notify
     end
 
     def attributes
