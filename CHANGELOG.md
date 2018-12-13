@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.40
+* Updated Request/Response loggin, by connecting them with identifier
+
 ### 0.8.39
 * Synchronizer#send_request returns parsed response
 

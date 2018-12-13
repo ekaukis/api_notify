@@ -34,9 +34,13 @@ module ApiNotify
         %w(200 201 202 203 204).include?(response[:status].to_s)
       end
 
+      def request_id
+        @request_id ||= "ReQ#{ Time.current.to_i }"
+      end
+
       def send_request(type = 'GET', url_param = false, endpoint)
         unless ApiNotify.configuration.config_defined?
-          raise FailedSynchronization, "missing configuration"
+          raise FailedSynchronization.new("missing configuration")
         end
 
         @config = ApiNotify.configuration.config(endpoint)
@@ -47,7 +51,10 @@ module ApiNotify
             http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           end
           _url = url_param ? build_url(url_param) : url(type)
-          LOGGER.info "Request #{@config["domain"]}:#{@config["port"]}#{_url}?#{params_query}"
+          LOGGER.info(
+            "#{ request_id } Response #{ @config["domain"] }:"\
+            "#{ @config["port"] }#{ _url }?#{ params_query }"
+          )
           @_response = http.send_request(type, _url, params_query, headers)
         rescue Exception => e
           @_response = {error: e}
@@ -86,7 +93,10 @@ module ApiNotify
 
       private
         def log_response
-          LOGGER.info "Response #{response[:status]}: #{ response[:body].to_s.truncate(1000, separator: "\n") if response[:body] }\n"
+          LOGGER.info(
+            "#{ request_id } Response #{ response[:status] }: "\
+            "#{ response[:body].to_s.truncate(1000, separator: "\n") }\n"
+          )
         end
     end
   end
