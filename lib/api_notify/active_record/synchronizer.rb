@@ -7,33 +7,41 @@ module ApiNotify
       require "net/http"
       require 'net/https'
 
-      def initialize route_name, id_param
+      def initialize(route_name, id_param)
         @_params = {}
         @route_name = route_name
         @id_param = id_param
       end
 
       def response
-        begin
-          { status: @_response.code, body: JSON.parse(@_response.body) }
-        rescue JSON::ParserError, NoMethodError => e
-
-          case e.class.name
-          when "NoMethodError"
-            { status: e.class.name, body: "#{@_response[:error].message}" }
-          when "JSON::ParserError"
-            { status: e.class.name, body: "#{e.message.truncate(1000, separator: "\n")}" }
-          end
-        end
+        {
+          status: @_response.code,
+          body: JSON.parse(@_response.body)
+        }
+      rescue JSON::ParserError => e
+        {
+          status: e.class.name,
+          body: e.message.truncate(1000, separator: "\n")
+        }
+      rescue NoMethodError => e
+        {
+          status: e.class.name,
+          body: @_response[:error].message
+        }
       end
 
       def success?
         %w(200 201 202 203 204).include?(response[:status].to_s)
       end
 
-      def send_request(type = 'GET', url_param = false, endpoint)
+      def request_id
+        @request_id ||= "ReQ#{ Time.current.to_i }"
+      end
 
-        raise FailedSynchronization, "missing configuration" unless ApiNotify.configuration.config_defined?
+      def send_request(type = 'GET', url_param = false, endpoint)
+        unless ApiNotify.configuration.config_defined?
+          raise FailedSynchronization.new("missing configuration")
+        end
 
         @config = ApiNotify.configuration.config(endpoint)
         begin
@@ -43,7 +51,10 @@ module ApiNotify
             http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           end
           _url = url_param ? build_url(url_param) : url(type)
-          LOGGER.info "Request #{@config["domain"]}:#{@config["port"]}#{_url}?#{params_query}"
+          LOGGER.info(
+            "#{ request_id } Response #{ @config["domain"] }:"\
+            "#{ @config["port"] }#{ _url }?#{ params_query }"
+          )
           @_response = http.send_request(type, _url, params_query, headers)
         rescue Exception => e
           @_response = {error: e}
@@ -82,7 +93,10 @@ module ApiNotify
 
       private
         def log_response
-          LOGGER.info "Response #{response[:status]}: #{ response[:body].to_s.truncate(1000, separator: "\n") if response[:body] }\n"
+          LOGGER.info(
+            "#{ request_id } Response #{ response[:status] }: "\
+            "#{ response[:body].to_s.truncate(1000, separator: "\n") }\n"
+          )
         end
     end
   end
