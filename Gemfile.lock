@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    api_notify (0.8.41)
+    api_notify (0.8.42)
       rufus-scheduler (= 3.2.1)
       sidekiq
       sidekiq-cron

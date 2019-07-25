@@ -242,7 +242,18 @@ module ApiNotify
       end
 
       def get_value(field)
-        "#{field.to_s}".split('.').inject(self) { |obj, method| obj.present? ? obj.send(method) : "" }
+        "#{field.to_s}".split('.').inject(self) do |obj, method|
+          custom_method_name = "api_notify_#{ method }"
+          if obj.present?
+            if obj.respond_to?(custom_method_name)
+              obj.send(custom_method_name)
+            else
+              obj.send(method)
+            end
+          else
+            ""
+          end
+        end
       end
 
       def field_changed?(field)

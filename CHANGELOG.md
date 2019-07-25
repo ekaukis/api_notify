@@ -1,5 +1,8 @@
 ## Changelog
 
+### 0.8.42
+* By default tries to get value from custom method "api_notify_#{ method }"
+
 ### 0.8.41
 * More realistice request numbers
 
